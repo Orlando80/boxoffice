@@ -1,0 +1,32 @@
+{
+  "$schema": "https://turborepo.com/schema.json",
+  "globalDependencies": [
+    "turbo.json",
+    "package.json",
+    "pnpm-lock.yaml",
+    "pnpm-workspace.yaml",
+    ".nvmrc",
+    "eslint.config.js",
+    "prettier.config.js",
+    "vitest.config.ts",
+    "vitest.int.config.ts",
+    "packages/config/tsconfig.*.json",
+    "packages/config/eslint.config.js",
+    "packages/config/vitest.base.ts",
+    "packages/config/prettier.config.js"
+  ],
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": [".next/**", "!.next/cache/**", "dist/**"]
+    },
+    "typecheck": {
+      "dependsOn": ["^typecheck"]
+    },
+    "lint": {},
+    "test": {},
+    "test:int": {
+      "cache": false
+    }
+  }
+}
