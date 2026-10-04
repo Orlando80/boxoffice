@@ -1,28 +1,78 @@
 {
   "permissions": {
     "allow": [
-      "Bash(pnpm typecheck)", "Bash(pnpm lint*)", "Bash(pnpm test*)",
-      "Bash(pnpm db:check)", "Bash(pnpm db:new *)", "Bash(pnpm turbo *)",
-      "Bash(git status*)", "Bash(git diff*)", "Bash(git log*)",
-      "Bash(git add *)", "Bash(git commit *)", "Bash(git checkout -b *)",
-      "Bash(gh pr create *)", "Bash(gh pr view *)"
+      "Bash(pnpm typecheck)",
+      "Bash(pnpm lint*)",
+      "Bash(pnpm test*)",
+      "Bash(pnpm db:check)",
+      "Bash(pnpm db:new *)",
+      "Bash(pnpm turbo *)",
+      "Bash(git status*)",
+      "Bash(git diff*)",
+      "Bash(git log*)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git checkout -b *)",
+      "Bash(gh pr create *)",
+      "Bash(gh pr view *)"
     ],
     "deny": [
-      "Read(./.env*)", "Read(./infra/**/*.secret*)",
-      "Bash(git push --force*)", "Bash(fly deploy*)", "Bash(fly secrets*)",
-      "PowerShell(git push --force*)", "PowerShell(fly deploy*)", "PowerShell(fly secrets*)"
+      "Read(./.env*)",
+      "Read(./infra/**/*.secret*)",
+      "Bash(git push --force*)",
+      "Bash(fly deploy*)",
+      "Bash(fly secrets*)",
+      "PowerShell(git push --force*)",
+      "PowerShell(fly deploy*)",
+      "PowerShell(fly secrets*)"
     ]
   },
   "hooks": {
     "PreToolUse": [
-      { "matcher": "Edit|Write", "hooks": [{ "type": "command", "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/protect-paths.sh\"" }] },
-      { "matcher": "Bash|PowerShell", "hooks": [{ "type": "command", "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/guard-bash.sh\"" }] }
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/protect-paths.sh\""
+          }
+        ]
+      },
+      {
+        "matcher": "Bash|PowerShell",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/guard-bash.sh\""
+          }
+        ]
+      }
     ],
     "PostToolUse": [
-      { "matcher": "Edit|Write", "hooks": [{ "type": "command", "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/format.sh\"" }] }
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/format.sh\""
+          }
+        ]
+      }
     ],
     "Stop": [
-      { "hooks": [{ "type": "command", "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/gate.sh\"", "timeout": 600 }] }
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/gate.sh\"",
+            "timeout": 600
+          }
+        ]
+      }
     ]
+  },
+  "enabledPlugins": {
+    "skill-creator@claude-plugins-official": true,
+    "frontend-design@claude-plugins-official": true
   }
 }

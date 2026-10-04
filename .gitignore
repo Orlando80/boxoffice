@@ -35,3 +35,6 @@ Thumbs.db
 
 # Claude Code local-only settings
 .claude/settings.local.json
+
+# skill-creator eval workspaces (local test runs, not part of the skill)
+.claude/skills/*-workspace/
