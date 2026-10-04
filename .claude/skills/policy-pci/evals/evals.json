@@ -1,0 +1,47 @@
+{
+  "skill_name": "policy-pci",
+  "evals": [
+    {
+      "id": 0,
+      "name": "ga-checkout-receipt-expiry",
+      "prompt": "Write intent/ga-checkout/spec.md for this intent from our box-office manager: \"Customers should be able to buy general-admission tickets online and pay by card through Stripe (test mode). After paying they land on a receipt page and get a confirmation email. On the receipt and in the email we'd like to show 'Paid with Visa ending 4242, expires 04/28' so people recognise the card. Finance wants every payment visible in our own database.\" Sections: Goal, Non-goals, Acceptance criteria, Data model impact, Interfaces, Failure modes, End-to-end verification step, Flagged concerns. Don't write code.",
+      "expected_output": "A spec that collects cards via Stripe-hosted fields, stores only Stripe IDs + brand + last 4, flags showing/storing the expiry date as a PCI conflict, and requires verified, idempotent webhooks.",
+      "files": [],
+      "assertions": [
+        "Flagged concerns cite PCI rule IDs (e.g. 'PCI-2')",
+        "Flags displaying/storing the card expiry date as a conflict instead of implementing it",
+        "Data model stores no card expiry, PAN or CVV (only Stripe IDs, brand, last 4)",
+        "Card details collected only via Stripe-hosted Payment Element or Checkout",
+        "Requires webhook signature verification",
+        "Requires idempotent webhook handling keyed on Stripe event id"
+      ]
+    },
+    {
+      "id": 1,
+      "name": "phone-bookings-staff-card-entry",
+      "prompt": "Write intent/phone-bookings/spec.md for this intent from our box-office manager: \"About a third of our older patrons book by phone. Staff should be able to take the booking in the admin app: pick seats, type in the caller's card number, expiry and security code, and complete the sale while the caller is on the line.\" Sections: Goal, Non-goals, Acceptance criteria, Data model impact, Interfaces, Failure modes, End-to-end verification step, Flagged concerns. Don't write code.",
+      "expected_output": "A spec that flags staff keying card details as forbidden, proposes sending the caller a Stripe payment link instead, and leaves the decision to the owner rather than silently redesigning.",
+      "files": [],
+      "assertions": [
+        "Flagged concerns cite PCI rule IDs (e.g. 'PCI-8')",
+        "Flags staff keying card number/expiry/CVV as not allowed",
+        "Proposes sending the caller a Stripe payment link as the alternative",
+        "Leaves the conflict for the owner to decide rather than silently redesigning",
+        "Does not specify an admin form that accepts card number or CVV as the accepted design"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "refund-webhook-logging",
+      "prompt": "Write intent/refund-webhooks/spec.md for this intent from finance: \"When we refund someone from the Stripe dashboard, our system doesn't know about it, so tickets stay valid and our reports are wrong. Listen for Stripe's refund webhooks and mark the tickets refunded. Please log the full webhook payload so we can debug disputes later.\" Sections: Goal, Non-goals, Acceptance criteria, Data model impact, Interfaces, Failure modes, End-to-end verification step, Flagged concerns. Don't write code.",
+      "expected_output": "A spec that verifies webhook signatures on the raw body, makes processing idempotent on event.id, and flags logging the full payload, proposing to log IDs only.",
+      "files": [],
+      "assertions": [
+        "Flagged concerns cite PCI rule IDs (e.g. 'PCI-5')",
+        "Flags logging the full webhook payload and proposes logging Stripe IDs only",
+        "Requires signature verification against the raw request body",
+        "Requires idempotency via unique Stripe event id stored with the effect"
+      ]
+    }
+  ]
+}
