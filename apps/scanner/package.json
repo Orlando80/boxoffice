@@ -1,0 +1,26 @@
+{
+  "name": "@boxoffice/scanner",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node ../../packages/config/next-run.mjs 3002 dev",
+    "build": "next build",
+    "start": "node ../../packages/config/next-run.mjs 3002 start",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": {
+    "next": "^16.3.8",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0"
+  },
+  "devDependencies": {
+    "@boxoffice/config": "workspace:*",
+    "@testing-library/react": "^16.3.3",
+    "@types/node": "^24.19.1",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "jsdom": "30.1.0"
+  }
+}

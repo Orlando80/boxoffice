@@ -1,0 +1,5 @@
+{
+  "extends": "@boxoffice/config/tsconfig.next.json",
+  "include": ["next-env.d.ts", "app", "test", "*.config.ts", "*.config.js", ".next/types/**/*.ts"],
+  "exclude": ["node_modules"]
+}
