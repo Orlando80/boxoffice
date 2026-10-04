@@ -8,6 +8,7 @@
     "./tsconfig.next.json": "./tsconfig.next.json",
     "./eslint": "./eslint.config.js",
     "./vitest.base": "./vitest.base.ts",
+    "./docker-preflight": "./docker-preflight.ts",
     "./prettier": "./prettier.config.js"
   },
   "scripts": {
