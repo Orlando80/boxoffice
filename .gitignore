@@ -38,3 +38,6 @@ Thumbs.db
 
 # skill-creator eval workspaces (local test runs, not part of the skill)
 .claude/skills/*-workspace/
+
+# Next.js generated
+next-env.d.ts
