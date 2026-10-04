@@ -1,0 +1,22 @@
+[
+  {"should_trigger": true,  "query": "finance wants a CSV of everyone who bought tickets to the Harbour Lights show on 14 Nov — names, emails, phones — so they can chase failed payments. spec it in intent/attendee-export"},
+  {"should_trigger": true,  "query": "we need a waitlist for sold out shows, people leave their email and get pinged when seats free up. what should the spec say about storing the emails?"},
+  {"should_trigger": true,  "query": "add an 'access requirements' field at checkout so wheelchair users and people needing a carer seat can tell us in advance"},
+  {"should_trigger": true,  "query": "a customer emailed asking us to delete all their data from the Riverside venue. how should erasure work given we keep orders for finance?"},
+  {"should_trigger": true,  "query": "scanner app should show the ticket holder's name when it scans so door staff can check ID — design the offline cache for that"},
+  {"should_trigger": true,  "query": "box office manager wants to search past bookings by customer surname and postcode in admin"},
+  {"should_trigger": true,  "query": "write the seed script for local dev: 3 venues, 20 events, a few hundred customers with orders"},
+  {"should_trigger": true,  "query": "reviewing PR #41: it adds Sentry to the api and attaches the request body to every error. anything wrong?"},
+  {"should_trigger": true,  "query": "let venues send a 'show cancelled' email to all ticket holders for an event, and maybe a newsletter later"},
+  {"should_trigger": true,  "query": "named tickets for the festival: each ticket in an order gets the attendee's full name printed on it"},
+  {"should_trigger": false, "query": "set up the monorepo skeleton: pnpm + turborepo, apps web/admin/scanner/api/worker, packages domain/db/contracts/config"},
+  {"should_trigger": false, "query": "wire the Temporal dev server to apps/worker with a hello-world workflow and a Testcontainers smoke test"},
+  {"should_trigger": false, "query": "design the seat map model: sections, rows, seats, render coordinates, and accessibility flags on seats"},
+  {"should_trigger": false, "query": "add price tiers per event — Standard, Concession, Premium — amounts in pence"},
+  {"should_trigger": false, "query": "the hold-expiry workflow releases seats late under load, profile it and propose a fix"},
+  {"should_trigger": false, "query": "write ci.yml: typecheck, lint, unit, then integration with testcontainers postgres"},
+  {"should_trigger": false, "query": "add a health-check endpoint to every app for Fly.io plus a /version route with the git sha"},
+  {"should_trigger": false, "query": "refactor money.ts so refunds split booking fees proportionally across tickets"},
+  {"should_trigger": false, "query": "Stripe webhook handler for payment_intent.succeeded, make it idempotent"},
+  {"should_trigger": false, "query": "event listing page in apps/web: upcoming events for a venue with dates, prices, availability"}
+]

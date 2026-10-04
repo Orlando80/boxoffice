@@ -1,0 +1,56 @@
+{
+  "skill_name": "policy-gdpr",
+  "evals": [
+    {
+      "id": 0,
+      "name": "waitlist-marketing-reuse",
+      "prompt": "Write intent/waitlist/spec.md for this intent from our marketing lead: \"When a show sells out we lose people. Let them join a waitlist with their name, email and mobile number, and text them when seats come back. Keep the list afterwards so we can email them about similar shows in future.\" Sections: Goal, Non-goals, Acceptance criteria, Data model impact, Interfaces, Failure modes, End-to-end verification step, Flagged concerns. Don't write code.",
+      "expected_output": "Flagged concerns cite GDPR rule IDs (e.g. 'GDPR-9'); Flags reusing the waitlist for future marketing as needing an owner decision rather than designing it in; Sets waitlist personal data to be deleted 30 days after the event (or flags the conflict with keeping it); Questions or justifies each collected field (name, email, mobile) against the feature's purpose",
+      "files": [],
+      "assertions": [
+        "Flagged concerns cite GDPR rule IDs (e.g. 'GDPR-9')",
+        "Flags reusing the waitlist for future marketing as needing an owner decision rather than designing it in",
+        "Sets waitlist personal data to be deleted 30 days after the event (or flags the conflict with keeping it)",
+        "Questions or justifies each collected field (name, email, mobile) against the feature's purpose"
+      ]
+    },
+    {
+      "id": 1,
+      "name": "access-needs-on-profile",
+      "prompt": "Write intent/access-profile/spec.md for this intent from our front-of-house manager: \"Customers with access needs (wheelchair user, carer seat, hearing loop, assistance dog) shouldn't have to tell us every time. Save their access needs on their customer profile, print them in the booking confirmation email, and show them on the door scanner so staff are ready.\" Sections: Goal, Non-goals, Acceptance criteria, Data model impact, Interfaces, Failure modes, End-to-end verification step, Flagged concerns. Don't write code.",
+      "expected_output": "Flagged concerns cite GDPR rule IDs (e.g. 'GDPR-4'); Treats access needs as health / special-category data requiring explicit consent; Flags storing access needs on the profile indefinitely as conflicting with the 30-day retention, for owner decision; Keeps access needs out of the confirmation email (or flags it for owner decision); Limits what the scanner shows/caches offline to what door staff need, restricted by role",
+      "files": [],
+      "assertions": [
+        "Flagged concerns cite GDPR rule IDs (e.g. 'GDPR-4')",
+        "Treats access needs as health / special-category data requiring explicit consent",
+        "Flags storing access needs on the profile indefinitely as conflicting with the 30-day retention, for owner decision",
+        "Keeps access needs out of the confirmation email (or flags it for owner decision)",
+        "Limits what the scanner shows/caches offline to what door staff need, restricted by role"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "cross-venue-top-fans",
+      "prompt": "Write intent/top-fans/spec.md for this intent from Boxoffice's own sales team: \"We want a platform-wide 'top fans' report ranking customers across all our venues by total spend and number of shows, so we can show venues who their biggest fans are elsewhere and pitch premium features.\" Sections: Goal, Non-goals, Acceptance criteria, Data model impact, Interfaces, Failure modes, End-to-end verification step, Flagged concerns. Don't write code.",
+      "expected_output": "Flagged concerns cite GDPR rule IDs (e.g. 'GDPR-1'); Flags cross-venue profiling for Boxoffice's own purposes as forbidden under the processor role; Leaves the conflict for the owner to decide rather than silently redesigning; Does not specify a cross-tenant customer ranking as the accepted design",
+      "files": [],
+      "assertions": [
+        "Flagged concerns cite GDPR rule IDs (e.g. 'GDPR-1')",
+        "Flags cross-venue profiling for Boxoffice's own purposes as forbidden under the processor role",
+        "Leaves the conflict for the owner to decide rather than silently redesigning",
+        "Does not specify a cross-tenant customer ranking as the accepted design"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "skeleton-stays-quiet",
+      "prompt": "Write intent/monorepo-skeleton/spec.md for this intent from the repo owner: \"monorepo skeleton: pnpm + turborepo workspace with apps web, admin, scanner, api, worker and packages domain, db, contracts, config; the five pnpm commands in CLAUDE.md working against an empty domain; Temporal dev server wired to worker; Testcontainers smoke test for Postgres; ci.yml green on an empty PR; deploy.yml building images but deploying nothing yet\" Sections: Goal, Non-goals, Acceptance criteria, Data model impact, Interfaces, Failure modes, End-to-end verification step, Flagged concerns. Don't write code.",
+      "expected_output": "Flagged concerns contain no GDPR-n rule citations; Raises no personal-data concerns (the skeleton holds no personal data)",
+      "files": [],
+      "assertions": [
+        "Flagged concerns contain no GDPR-n rule citations",
+        "Raises no personal-data concerns (the skeleton holds no personal data)"
+      ]
+    }
+  ]
+}
