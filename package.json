@@ -13,6 +13,7 @@
     "test:int": "vitest run --config vitest.int.config.ts",
     "db:check": "pnpm --filter @boxoffice/db exec drizzle-kit check",
     "db:new": "pnpm --filter @boxoffice/db exec drizzle-kit generate --name",
+    "ci:changed": "node scripts/ci-changed.mjs",
     "soak": "node -e \"console.log('soak: placeholder until the reservation engine exists')\""
   },
   "devDependencies": {
@@ -20,6 +21,7 @@
     "prettier": "^3.9.9",
     "turbo": "^2.11.7",
     "typescript": "^6.0.3",
-    "vitest": "^5.0.3"
+    "vitest": "^5.0.3",
+    "yaml": "^2.9.1"
   }
 }

@@ -6,6 +6,8 @@
     "pnpm-lock.yaml",
     "pnpm-workspace.yaml",
     ".nvmrc",
+    ".github/workflows/ci.yml",
+    "scripts/ci-changed.mjs",
     "eslint.config.js",
     "prettier.config.js",
     "vitest.config.ts",

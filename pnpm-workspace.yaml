@@ -1,6 +1,7 @@
 packages:
   - "apps/*"
   - "packages/*"
+  - "test/repo"
 allowBuilds:
   esbuild: false
   cpu-features: false
