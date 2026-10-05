@@ -1,7 +1,7 @@
-import { fileURLToPath } from "node:url";
-import { NativeConnection, Worker } from "@temporalio/worker";
+import { NativeConnection } from "@temporalio/worker";
 import { buildConnectionOptions } from "./connection.js";
 import { parseEnv } from "./env.js";
+import { createWorker } from "./worker.js";
 
 const env = parseEnv(process.env);
 
@@ -14,12 +14,7 @@ try {
   process.exit(1);
 }
 
-const worker = await Worker.create({
-  connection,
-  namespace: env.TEMPORAL_NAMESPACE,
-  taskQueue: "boxoffice",
-  workflowsPath: fileURLToPath(new URL("./workflows.ts", import.meta.url)),
-});
+const worker = await createWorker(connection, { namespace: env.TEMPORAL_NAMESPACE });
 
 const shutdown = (): void => {
   worker.shutdown();
