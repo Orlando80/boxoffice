@@ -1,6 +1,6 @@
 # Plan: venues, events and seat maps (read-only admin)
 
-Status: draft (awaiting owner review)
+Status: approved (owner accepted P1–P6 recommendations, 2026-10-05)
 Intent: [intent.md](intent.md) · Spec: [spec.md](spec.md)
 Date: 2026-10-05
 
@@ -9,10 +9,10 @@ Each step lists the spec ACs it covers so `/implement` can hand them to qa.
 qa writes `*.test.ts(x)` and `*.int.test.ts` files; dev writes everything
 else, including test harnesses under `src/` or `packages/config`.
 
-Steps marked **⚑Pn** depend on a plan question below. Each has a
-recommendation, but none is decided.
+Steps marked **⚑Pn** depend on a plan question below; implement the
+recommended option.
 
-## Plan questions (spec ambiguities; owner to decide)
+## Plan questions (resolved: owner accepted every recommendation, 2026-10-05)
 
 **P1. AC 4 ("no real venue names, people or addresses") can't be checked by
 machine.** A test can't tell whether "Harbour Lights Theatre" exists. No
