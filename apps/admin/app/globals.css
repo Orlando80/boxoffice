@@ -97,3 +97,75 @@ button {
   font: inherit;
   padding: 0.5rem 1rem;
 }
+
+.seatmap {
+  margin: 0 0 1.5rem;
+}
+
+.seatmap-svg {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  max-height: 80vh;
+  border: 1px solid var(--border);
+}
+
+.seatmap-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  margin: 0.5rem 0;
+}
+
+.seatmap-controls button {
+  min-width: 24px;
+  min-height: 24px;
+}
+
+.seatmap-legend {
+  list-style: none;
+  padding: 0;
+}
+
+.seatmap-legend li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.seat circle,
+.seat rect,
+.seat polygon {
+  fill: #ffffff;
+  stroke: #595959;
+  stroke-width: 1;
+}
+
+.seat-wheelchair rect {
+  fill: #cfe3fa;
+  stroke: #0b4f9c;
+}
+
+.seat-companion polygon {
+  fill: #fde7c2;
+  stroke: #7a4a00;
+}
+
+.seat-access polygon {
+  fill: #dcefd9;
+  stroke: #1e5c1a;
+}
+
+.seat text,
+.ga text {
+  fill: #1a1a1a;
+}
+
+.ga-area {
+  fill: #f2f2f2;
+  stroke: #595959;
+  stroke-width: 1;
+  stroke-dasharray: 4 2;
+}
