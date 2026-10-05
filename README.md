@@ -29,13 +29,44 @@ intent  →  spec  →  plan  →  implement  →  ship  →  maintain
 The commit history of each `intent/<slug>/` folder is the audit trail.
 Trivial changes (a one-sentence diff) skip the ceremony.
 
+## Local setup
+
+Prerequisites:
+
+- Node, at the version pinned in `.nvmrc` (`nvm use` or `fnm use`)
+- pnpm, via corepack (`corepack enable`)
+- Docker, for `pnpm test:int` and local image builds
+
+```
+pnpm install
+pnpm temporal:dev   # Temporal dev server on localhost:7233, UI on :8233
+```
+
+Copy `.env.example` to `.env` if you need to override defaults.
+
+| Command | What it does |
+|---|---|
+| `pnpm typecheck` | Type-check all packages |
+| `pnpm lint` | Lint all packages |
+| `pnpm test <path>` | Unit tests; pass a path while iterating |
+| `pnpm test:int` | Integration tests (needs Docker) |
+| `pnpm db:check` | Check migrations are consistent with the schema |
+| `pnpm db:new <name>` | Generate a new migration (never hand-edit migrations) |
+| `pnpm temporal:dev` | Run a local Temporal dev server |
+| `pnpm soak` | Run the soak check |
+| `pnpm ci:changed` | Run the CI checks for packages changed against `origin/main` |
+| `pnpm docker:build <app>` | Build an app image locally |
+
+`pnpm docker:build <app>` wraps `docker build` and passes `NODE_VERSION` read
+from `.nvmrc`. `<app>` is one of api, web, admin, scanner, worker.
+
 ## Status
 
 Bootstrapping. See [docs/bootstrap.md](docs/bootstrap.md) for the full brief.
 
 ### Intents
 
-_None yet. The first one is the monorepo skeleton._
+- [monorepo-skeleton](intent/monorepo-skeleton/intent.md): workspace, apps, CI and Docker images.
 
 ## Licence
 
