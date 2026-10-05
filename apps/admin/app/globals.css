@@ -169,3 +169,11 @@ button {
   stroke-width: 1;
   stroke-dasharray: 4 2;
 }
+
+/* Inactive but focusable: dashed border and grey text (both >= 3:1 on white), not colour alone. */
+button[aria-disabled="true"] {
+  color: #595959;
+  background: #f0f0f0;
+  border: 2px dashed #595959;
+  cursor: not-allowed;
+}

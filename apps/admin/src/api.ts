@@ -18,7 +18,7 @@ async function get<T>(path: string, schema: z.ZodType<T>): Promise<T | null> {
   } catch {
     throw new ApiUnavailable();
   }
-  if (res.status === 404) return null;
+  if (res.status === 404 || res.status === 400) return null;
   if (!res.ok) throw new ApiUnavailable();
   let body: unknown;
   try {

@@ -73,6 +73,19 @@ describe("api client 404 handling", () => {
   });
 });
 
+describe("api client 400 handling", () => {
+  it("getVenue / getEvent / getLayout return null on 400", async () => {
+    fetchMock.mockImplementation(async () => json({ error: "bad_request" }, 400));
+    await expect(getVenue("not-a-uuid")).resolves.toBeNull();
+    await expect(getEvent(ID, "not-a-uuid")).resolves.toBeNull();
+    await expect(getLayout(ID, "not-a-uuid")).resolves.toBeNull();
+  });
+  it("getVenues 400 is ApiUnavailable", async () => {
+    fetchMock.mockImplementation(async () => json({ error: "bad_request" }, 400));
+    await expect(getVenues()).rejects.toBeInstanceOf(ApiUnavailable);
+  });
+});
+
 describe("api client request shape", () => {
   it("encodes path segments", async () => {
     fetchMock.mockImplementation(async () => json({}, 404));

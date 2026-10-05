@@ -339,15 +339,18 @@ describe("4. zoom controls", () => {
   const status = () => screen.getByRole("status").textContent;
   const vb = () => document.querySelector("svg[role=img]")!.getAttribute("viewBox")!;
   const btn = (n: string) => screen.getByRole("button", { name: n }) as HTMLButtonElement;
+  const off = (n: string) => btn(n).getAttribute("aria-disabled") === "true";
   const pans = ["Pan left", "Pan right", "Pan up", "Pan down"];
 
   it("zoom in/out/reset and pan state", () => {
     render(<SeatMap model={buildModel(fixture)} />);
     const v0 = vb();
     expect(status()).toBe("Zoom 100%");
-    for (const p of pans) expect(btn(p).disabled).toBe(true);
-    expect(btn("Zoom out").disabled).toBe(true);
-    expect(btn("Reset").disabled).toBe(true);
+    for (const p of pans) expect(off(p)).toBe(true);
+    expect(off("Zoom out")).toBe(true);
+    expect(off("Reset")).toBe(true);
+    expect(off("Zoom in")).toBe(false);
+    for (const b of screen.getAllByRole("button")) expect(b.hasAttribute("disabled")).toBe(false);
 
     fireEvent.click(btn("Zoom in"));
     expect(status()).toBe("Zoom 150%");
@@ -356,14 +359,16 @@ describe("4. zoom controls", () => {
     const w0 = Number(v0.split(" ")[2]);
     const w1 = Number(v1.split(" ")[2]);
     expect(w1).toBeCloseTo(w0 / 1.5, 1);
-    for (const p of pans) expect(btn(p).disabled).toBe(false);
+    for (const p of pans) expect(off(p)).toBe(false);
+    expect(off("Zoom out")).toBe(false);
+    expect(off("Reset")).toBe(false);
 
     fireEvent.click(btn("Pan right"));
     expect(vb()).not.toBe(v1);
     fireEvent.click(btn("Zoom out"));
     expect(status()).toBe("Zoom 100%");
     expect(vb()).toBe(v0);
-    for (const p of pans) expect(btn(p).disabled).toBe(true);
+    for (const p of pans) expect(off(p)).toBe(true);
 
     fireEvent.click(btn("Zoom in"));
     fireEvent.click(btn("Zoom in"));
@@ -375,8 +380,8 @@ describe("4. zoom controls", () => {
   it("caps zoom and pan never leaves bounds", () => {
     render(<SeatMap model={buildModel(fixture)} />);
     const b = buildModel(fixture).bounds;
-    for (let i = 0; i < 12; i++) if (!btn("Zoom in").disabled) fireEvent.click(btn("Zoom in"));
-    expect(btn("Zoom in").disabled).toBe(true);
+    for (let i = 0; i < 12; i++) if (!off("Zoom in")) fireEvent.click(btn("Zoom in"));
+    expect(off("Zoom in")).toBe(true);
     for (let i = 0; i < 40; i++) {
       fireEvent.click(btn("Pan left"));
       fireEvent.click(btn("Pan up"));
@@ -391,6 +396,35 @@ describe("4. zoom controls", () => {
     const [x2, y2, w2, h2] = vb().split(" ").map(Number);
     expect(x2! + w2!).toBeLessThanOrEqual(b.x + b.width + 0.05);
     expect(y2! + h2!).toBeLessThanOrEqual(b.y + b.height + 0.05);
+  });
+  it("clicking an aria-disabled button does nothing", () => {
+    render(<SeatMap model={buildModel(fixture)} />);
+    const v0 = vb();
+    for (const n of ["Zoom out", "Reset", ...pans]) {
+      expect(off(n)).toBe(true);
+      fireEvent.click(btn(n));
+      expect(vb(), n).toBe(v0);
+      expect(status(), n).toBe("Zoom 100%");
+    }
+    for (let i = 0; i < 12; i++) fireEvent.click(btn("Zoom in"));
+    expect(off("Zoom in")).toBe(true);
+    const vMax = vb();
+    const sMax = status();
+    fireEvent.click(btn("Zoom in"));
+    expect(vb()).toBe(vMax);
+    expect(status()).toBe(sMax);
+  });
+  it("pressed button keeps focus when it becomes aria-disabled at 100%", () => {
+    render(<SeatMap model={buildModel(fixture)} />);
+    for (const n of ["Reset", "Zoom out"]) {
+      fireEvent.click(btn("Zoom in"));
+      expect(status()).toBe("Zoom 150%");
+      btn(n).focus();
+      fireEvent.click(btn(n));
+      expect(status()).toBe("Zoom 100%");
+      expect(off(n)).toBe(true);
+      expect(document.activeElement).toBe(btn(n));
+    }
   });
   it("controls are real buttons with names; aria-controls targets the svg", () => {
     render(<SeatMap model={buildModel(fixture)} />);

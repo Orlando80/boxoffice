@@ -79,14 +79,14 @@ describe("seed (AC 3) against a real Postgres", () => {
 
     const problems = validateSeed(g);
     expect(problems.length).toBeGreaterThan(0);
-    expect(problems.join("\n")).toMatch(/venue "Riverside Studio \(Example\)": rule \S+ on /);
+    expect(problems.join("\n")).toMatch(/venue "Quillmarsh Studio \(Example\)": rule \S+ on /);
 
     const err = await seedDatabase(url, g).then(
       () => undefined,
       (e: unknown) => e as Error,
     );
     expect(err).toBeInstanceOf(Error);
-    expect(err!.message).toContain("Riverside Studio (Example)");
+    expect(err!.message).toContain("Quillmarsh Studio (Example)");
     expect(err!.message).toMatch(/rule \S+/);
     expect(await counts()).toEqual(Object.fromEntries(TABLES.map((t) => [t, 0])));
   });
@@ -138,9 +138,9 @@ describe("seed (AC 3) against a real Postgres", () => {
     expect(per.map((r) => r.n)).toEqual([100, 1200, 5000]);
     const names = await sql`select name, time_zone from venue order by name`;
     expect(names.map((r) => r.name)).toEqual([
+      "Fernhollow Arena (Example)",
       "Harbour Lane Theatre (Example)",
-      "Northgate Arena (Example)",
-      "Riverside Studio (Example)",
+      "Quillmarsh Studio (Example)",
     ]);
     expect(names.every((r) => r.time_zone === "Europe/London")).toBe(true);
   }, 120_000);
@@ -157,7 +157,7 @@ describe("seed (AC 3) against a real Postgres", () => {
     const before = await snapshot();
     const g = mutableSeed();
     g.layouts[0]!.sections[0]!.seats.push({ ...g.layouts[0]!.sections[0]!.seats[0]! });
-    await expect(seedDatabase(url, g)).rejects.toThrow(/venue "Riverside Studio \(Example\)"/);
+    await expect(seedDatabase(url, g)).rejects.toThrow(/venue "Quillmarsh Studio \(Example\)"/);
     expect(await snapshot()).toEqual(before);
   });
 

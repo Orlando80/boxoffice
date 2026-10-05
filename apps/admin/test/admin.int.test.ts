@@ -4,7 +4,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { startStack, type Stack } from "./support/stack";
 
 const THEATRE = "Harbour Lane Theatre (Example)";
-const ARENA = "Northgate Arena (Example)";
+const ARENA = "Fernhollow Arena (Example)";
 const fileStart = Date.now();
 
 let stack: Stack;
@@ -195,6 +195,22 @@ describe("AC 11: keyboard-only path", () => {
     await expect.poll(() => status.innerText()).toBe("Zoom 150%");
     await page.keyboard.press("Space");
     await expect.poll(() => status.innerText()).toBe("Zoom 100%");
+    // Regression: the button just pressed is now aria-disabled but must keep visible focus.
+    const atMin = await expectFocusVisible(page, "Zoom out immediately at 100%");
+    expect(atMin.name).toBe("Zoom out");
+    expect(
+      await page.evaluate(() => document.activeElement?.getAttribute("aria-disabled")),
+    ).toBe("true");
+
+    // Same for Reset.
+    await tabTo(page, /^Zoom in$/, "Zoom in again", "Shift+Tab");
+    await page.keyboard.press("Enter");
+    await expect.poll(() => status.innerText()).toBe("Zoom 150%");
+    await tabTo(page, /^Reset$/, "Reset");
+    await page.keyboard.press("Enter");
+    await expect.poll(() => status.innerText()).toBe("Zoom 100%");
+    const afterReset = await expectFocusVisible(page, "Reset immediately at 100%");
+    expect(afterReset.name).toBe("Reset");
 
     // Tab into the Stalls seat table region (focusable, named).
     const region = await tabTo(page, /Stalls seat table/, "Stalls seat table region");
@@ -249,6 +265,19 @@ describe("AC 11: keyboard-only path", () => {
     expect(accessText).toMatch(/wheelchair space/i);
     expect(accessText).toMatch(/Has companion/);
     expect(companionText).toContain(`Companion for ${accessLabel}`);
+    await page.close();
+  });
+});
+
+describe("malformed ids show not-found, not the outage page", () => {
+  it.each([
+    ["venue id", () => `${stack.adminUrl}/venues/not-a-uuid`],
+    ["layout id", () => theatreUrl + "/layouts/not-a-uuid"],
+  ])("%s", async (_n, url) => {
+    const page = await newPage();
+    await page.goto(url());
+    await expect.poll(() => page.locator("h1").innerText()).toBe("Page not found");
+    expect(await page.locator("body").innerText()).not.toContain("Something went wrong");
     await page.close();
   });
 });

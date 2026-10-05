@@ -16,6 +16,18 @@ describe("seed fixtures hygiene (P1)", () => {
     for (const v of graph.venues) expect(v.name.endsWith(" (Example)"), v.name).toBe(true);
   });
 
+  it("does not reuse names flagged as too close to real venues", () => {
+    const denied = [
+      "Riverside Studio",
+      "Riverside Studios",
+      "Northgate Arena",
+      "riverside-studio",
+      "northgate-arena",
+    ];
+    const lower = dump.toLowerCase();
+    for (const d of denied) expect(lower, d).not.toContain(d.toLowerCase());
+  });
+
   it("contains no email addresses other than @example.com", () => {
     const emails = dump.match(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g) ?? [];
     for (const e of emails) expect(e.toLowerCase().endsWith("@example.com"), e).toBe(true);

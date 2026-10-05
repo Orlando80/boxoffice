@@ -161,7 +161,7 @@ const makeVenue = (slug: string, name: string): Venue => ({
 
 export function buildSeed(): VenueGraph {
   // Studio: ~300 capacity, GA standing plus a small reserved block (100 seats + 200 standing).
-  const studio = makeVenue("riverside-studio", "Riverside Studio (Example)");
+  const studio = makeVenue("quillmarsh-studio", "Quillmarsh Studio (Example)");
   const studioStanding = makeLayout(studio, "Standing and stalls", [
     reservedSection(studio.slug, "Standing and stalls", {
       name: "Stalls",
@@ -226,7 +226,7 @@ export function buildSeed(): VenueGraph {
   ]);
 
   // Arena: 5,000 reserved seats plus a 500 GA floor.
-  const arena = makeVenue("northgate-arena", "Northgate Arena (Example)");
+  const arena = makeVenue("fernhollow-arena", "Fernhollow Arena (Example)");
   const arenaConcert = makeLayout(arena, "Concert", [
     gaSection(arena.slug, "Concert", "Floor", 500),
     reservedSection(arena.slug, "Concert", {

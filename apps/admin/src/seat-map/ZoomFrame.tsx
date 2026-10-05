@@ -29,6 +29,8 @@ export function ZoomFrame({
     y: bounds.y + bounds.height / 2,
   });
 
+  const atMin = zoom <= MIN_ZOOM;
+  const atMax = zoom >= MAX_ZOOM;
   const w = bounds.width / zoom;
   const h = bounds.height / zoom;
   const clamp = (c: { x: number; y: number }, z: number) => ({
@@ -61,32 +63,32 @@ export function ZoomFrame({
         <button
           type="button"
           aria-controls={id}
-          onClick={() => zoomTo(zoom * ZOOM_STEP)}
-          disabled={zoom >= MAX_ZOOM}
+          onClick={() => !atMax && zoomTo(zoom * ZOOM_STEP)}
+          aria-disabled={atMax ? "true" : undefined}
         >
           Zoom in
         </button>
         <button
           type="button"
           aria-controls={id}
-          onClick={() => zoomTo(zoom / ZOOM_STEP)}
-          disabled={zoom <= MIN_ZOOM}
+          onClick={() => !atMin && zoomTo(zoom / ZOOM_STEP)}
+          aria-disabled={atMin ? "true" : undefined}
         >
           Zoom out
         </button>
-        <button type="button" aria-controls={id} onClick={reset} disabled={zoom === 1}>
+        <button type="button" aria-controls={id} onClick={() => !atMin && reset()} aria-disabled={atMin ? "true" : undefined}>
           Reset
         </button>
-        <button type="button" aria-controls={id} onClick={() => pan(-1, 0)} disabled={zoom === 1}>
+        <button type="button" aria-controls={id} onClick={() => !atMin && pan(-1, 0)} aria-disabled={atMin ? "true" : undefined}>
           Pan left
         </button>
-        <button type="button" aria-controls={id} onClick={() => pan(1, 0)} disabled={zoom === 1}>
+        <button type="button" aria-controls={id} onClick={() => !atMin && pan(1, 0)} aria-disabled={atMin ? "true" : undefined}>
           Pan right
         </button>
-        <button type="button" aria-controls={id} onClick={() => pan(0, -1)} disabled={zoom === 1}>
+        <button type="button" aria-controls={id} onClick={() => !atMin && pan(0, -1)} aria-disabled={atMin ? "true" : undefined}>
           Pan up
         </button>
-        <button type="button" aria-controls={id} onClick={() => pan(0, 1)} disabled={zoom === 1}>
+        <button type="button" aria-controls={id} onClick={() => !atMin && pan(0, 1)} aria-disabled={atMin ? "true" : undefined}>
           Pan down
         </button>
         <span role="status">Zoom {Math.round(zoom * 100)}%</span>

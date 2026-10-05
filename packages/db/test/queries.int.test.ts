@@ -20,9 +20,9 @@ describe("queries against the seeded database", () => {
   let sql: ReturnType<typeof postgres>;
   const graph = buildSeed();
   const byName = (n: string) => graph.venues.find((v) => v.name.startsWith(n))!;
-  const studio = byName("Riverside");
+  const studio = byName("Quillmarsh");
   const theatre = byName("Harbour");
-  const arena = byName("Northgate");
+  const arena = byName("Fernhollow");
   const eventsOf = (v: { id: string }) => graph.events.filter((e) => e.venueId === v.id);
   const layoutsOf = (v: { id: string }) => graph.layouts.filter((l) => l.venueId === v.id);
 
@@ -44,9 +44,9 @@ describe("queries against the seeded database", () => {
   it("listVenues returns the three venues", async () => {
     const vs = await listVenues(db);
     expect(vs.map((v) => v.name)).toEqual([
+      "Fernhollow Arena (Example)",
       "Harbour Lane Theatre (Example)",
-      "Northgate Arena (Example)",
-      "Riverside Studio (Example)",
+      "Quillmarsh Studio (Example)",
     ]);
   });
 
@@ -209,10 +209,10 @@ describe("queries against the seeded database", () => {
       }
     }
     expect(counts).toEqual({
-      "riverside-studio/Standing and stalls": 100,
-      "riverside-studio/All standing": 0,
+      "quillmarsh-studio/Standing and stalls": 100,
+      "quillmarsh-studio/All standing": 0,
       "harbour-lane-theatre/End-on": 1200,
-      "northgate-arena/Concert": 5000,
+      "fernhollow-arena/Concert": 5000,
     });
   });
 }, 300_000);
