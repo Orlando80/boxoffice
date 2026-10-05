@@ -1,6 +1,6 @@
 # Spec: venues, events and seat maps (read-only admin)
 
-Status: draft
+Status: approved
 Intent: [intent.md](intent.md)
 Date: 2026-10-05
 
@@ -269,7 +269,12 @@ personal data is stored, and nothing stores or computes money.
    database-free. The api Docker image needs the env at runtime (no default
    in production).
 
-### Owner decisions needed (intent open questions, with recommendations)
+## Decisions (owner, 2026-10-05)
+
+The owner accepted every recommendation below and in Flagged concerns 1–6
+(table-plus-scaled-map for large layouts; Playwright, Chromium only, in
+`pnpm test:int`; explicit same-section companion links; dev-only venue
+picker; admin never deployed before auth; API reads `DATABASE_URL`).
 
 | #   | Question                             | Recommendation                                                                                                                                                                                                                                                          |
 | --- | ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
