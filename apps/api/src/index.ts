@@ -1,8 +1,8 @@
 import { sql } from "drizzle-orm";
-import * as queries from "@boxoffice/db";
 import { createDb } from "@boxoffice/db";
 import { buildApp } from "./app.js";
 import { parseEnv } from "./env.js";
+import { createRepository } from "./repository.js";
 
 const { PORT, DATABASE_URL } = parseEnv(process.env);
 const { db, close } = createDb(DATABASE_URL);
@@ -16,14 +16,7 @@ try {
   process.exit(1);
 }
 
-const app = buildApp({
-  listVenues: () => queries.listVenues(db),
-  getVenue: (v) => queries.getVenue(db, v),
-  listLayouts: (v) => queries.listLayouts(db, v),
-  listEvents: (v) => queries.listEvents(db, v),
-  getEvent: (v, e) => queries.getEvent(db, v, e),
-  getLayoutView: (v, l) => queries.getLayoutView(db, v, l),
-});
+const app = buildApp(createRepository(db));
 
 const shutdown = (): void => {
   app
