@@ -41,3 +41,7 @@ Thumbs.db
 
 # Next.js generated
 next-env.d.ts
+
+# Codex-format copies of .claude config (local only)
+.agents/
+.codex/
