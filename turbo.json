@@ -22,7 +22,7 @@
     "SECURITY.md",
     "README.md",
     ".github/pull_request_template.md",
-    ".github/workflows/deploy.yml.proposed"
+    ".github/workflows/deploy.yml"
   ],
   "tasks": {
     "build": {

@@ -6,7 +6,7 @@ import { parse } from "yaml";
 import { describe, expect, it } from "vitest";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
-const file = resolve(root, ".github/workflows/deploy.yml.proposed");
+const file = resolve(root, ".github/workflows/deploy.yml");
 const raw = readFileSync(file, "utf8");
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const wf: any = parse(raw);
@@ -31,10 +31,10 @@ const find = (pred: (s: any) => boolean) => steps.find(pred); // eslint-disable-
 const login = find((s) => String(s.uses ?? "").startsWith("docker/login-action"));
 const build = find((s) => String(s.uses ?? "").startsWith("docker/build-push-action"));
 
-describe("deploy.yml.proposed (AC 18, F7)", () => {
-  it("is a proposal only: deploy.yml does not exist", () => {
-    expect(existsSync(resolve(root, ".github/workflows/deploy.yml"))).toBe(false);
-    expect(existsSync(file)).toBe(true);
+describe("deploy.yml (AC 18, F7)", () => {
+  it("is promoted: deploy.yml exists and deploy.yml.proposed does not", () => {
+    expect(existsSync(resolve(root, ".github/workflows/deploy.yml"))).toBe(true);
+    expect(existsSync(resolve(root, ".github/workflows/deploy.yml.proposed"))).toBe(false);
   });
 
   it("top-level permissions are exactly contents: read, packages: write", () => {

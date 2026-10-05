@@ -34,7 +34,7 @@ describe("affected-only runs still select repo checks (AC 15-17, AC 20)", () => 
       "SECURITY.md",
       "README.md",
       ".github/pull_request_template.md",
-      ".github/workflows/deploy.yml.proposed",
+      ".github/workflows/deploy.yml",
       ".github/workflows/ci.yml",
       ".nvmrc",
       "package.json",
