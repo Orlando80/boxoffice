@@ -1,0 +1,64 @@
+{
+  "skill_name": "policy-accessibility",
+  "evals": [
+    {
+      "id": 0,
+      "name": "seat-map-picker",
+      "prompt": "Write intent/seat-picker/spec.md for this intent from our product lead: \"Customers pick reserved seats on an interactive SVG seat map. Seats are green when free, grey when sold and red when someone else is holding them. Drag to pan and pinch to zoom on mobile, tap a seat to add it. Once you pick seats you get a 10-minute hold with a countdown in the corner, then they go back on sale.\" Sections: Goal, Non-goals, Acceptance criteria, Data model impact, Interfaces, Failure modes, End-to-end verification step, Flagged concerns. Don't write code.",
+      "files": [],
+      "assertions": [
+        "Flagged concerns cite A11Y rule IDs (e.g. 'A11Y-3')",
+        "Requires a list/table alternative to the seat map offering the same actions (A11Y-3)",
+        "Flags or replaces colour-only seat states (green/grey/red) with text, icon, shape or pattern (A11Y-4)",
+        "Does not make drag-to-pan or pinch-to-zoom the only way to operate the map (A11Y-3)",
+        "Makes the 10-minute hold extendable with a warning before expiry, or flags the conflict for owner decision (A11Y-5)",
+        "Acceptance criteria include an automated accessibility (axe) check and/or a keyboard-only test (A11Y-11)",
+        "Expired holds on access or companion seats return to the access pool, not general sale (A11Y-10)",
+        "Access seats are not treated as ordinary seats: booking one requires a declared access need (A11Y-8)"
+      ],
+      "expected_output": "Flagged concerns cite A11Y rule IDs (e.g. 'A11Y-3'); Requires a list/table alternative to the seat map offering the same actions (A11Y-3); Flags or replaces colour-only seat states (green/grey/red) with text, icon, shape or pattern (A11Y-4); Does not make drag-to-pan or pinch-to-zoom the only way to operate the map (A11Y-3); Makes the 10-minute hold extendable with a warning before expiry, or flags the conflict for owner decision (A11Y-5); Acceptance criteria include an automated accessibility (axe) check and/or a keyboard-only test (A11Y-11); Expired holds on access or companion seats return to the access pool, not general sale (A11Y-10); Access seats are not treated as ordinary seats: booking one requires a declared access need (A11Y-8)"
+    },
+    {
+      "id": 1,
+      "name": "access-seat-proof-and-release",
+      "prompt": "Write intent/access-booking/spec.md for this intent from the box-office manager at a 1,200-seat theatre: \"Wheelchair spaces keep getting bought by people who don't need them. Make customers upload a Blue Badge or PIP letter before they can book a wheelchair space, and let staff check it. Any wheelchair spaces still unsold 48 hours before the show should go on general sale automatically so we don't lose the money. Carers can come at half price.\" Sections: Goal, Non-goals, Acceptance criteria, Data model impact, Interfaces, Failure modes, End-to-end verification step, Flagged concerns. Don't write code.",
+      "files": [],
+      "assertions": [
+        "Flagged concerns cite A11Y rule IDs (e.g. 'A11Y-8')",
+        "Flags requiring a Blue Badge / PIP letter upload as conflicting with self-declared access booking, for owner decision rather than designing it in (A11Y-8)",
+        "Flags automatic 48-hour release of unsold wheelchair spaces as conflicting with never auto-releasing, for owner decision (A11Y-10)",
+        "Flags half-price carers as conflicting with the free companion ticket, for owner decision (A11Y-9)",
+        "Treats any proof documents / access needs as health data under GDPR (cites GDPR-4 or equivalent)",
+        "Does not specify document upload and staff verification as the accepted design",
+        "Still designs the parts that don't conflict: self-declared access need from set categories, a companion seat next to the access seat, and manual per-seat release by staff recorded in an audit log"
+      ],
+      "expected_output": "Flagged concerns cite A11Y rule IDs (e.g. 'A11Y-8'); Flags requiring a Blue Badge / PIP letter upload as conflicting with self-declared access booking, for owner decision rather than designing it in (A11Y-8); Flags automatic 48-hour release of unsold wheelchair spaces as conflicting with never auto-releasing, for owner decision (A11Y-10); Flags half-price carers as conflicting with the free companion ticket, for owner decision (A11Y-9); Treats any proof documents / access needs as health data under GDPR (cites GDPR-4 or equivalent); Does not specify document upload and staff verification as the accepted design; Still designs the parts that don't conflict: self-declared access need from set categories, a companion seat next to the access seat, and manual per-seat release by staff recorded in an audit log"
+    },
+    {
+      "id": 2,
+      "name": "onsale-queue-hard-timer",
+      "prompt": "Write intent/onsale-queue/spec.md for this intent from our head of ticketing: \"Big on-sales crash us. Put buyers in a virtual queue with an image CAPTCHA to stop bots. When you reach the front you get exactly 5 minutes to finish checkout, no extensions, because extending would be unfair to the people still queuing.\" Sections: Goal, Non-goals, Acceptance criteria, Data model impact, Interfaces, Failure modes, End-to-end verification step, Flagged concerns. Don't write code.",
+      "files": [],
+      "assertions": [
+        "Flagged concerns cite A11Y rule IDs (e.g. 'A11Y-6')",
+        "Flags the image CAPTCHA as needing an accessible alternative or replacement (A11Y-6)",
+        "Flags the no-extension 5-minute checkout timer as conflicting with extendable time limits, for owner decision rather than silently accepting or overriding it (A11Y-5)",
+        "Requires queue position / timer changes to be announced to screen readers (live region or equivalent)",
+        "Access or companion seats in a checkout window that expires return to the access pool, not general sale (A11Y-10)"
+      ],
+      "expected_output": "Flagged concerns cite A11Y rule IDs (e.g. 'A11Y-6'); Flags the image CAPTCHA as needing an accessible alternative or replacement (A11Y-6); Flags the no-extension 5-minute checkout timer as conflicting with extendable time limits, for owner decision rather than silently accepting or overriding it (A11Y-5); Requires queue position / timer changes to be announced to screen readers (live region or equivalent); Access or companion seats in a checkout window that expires return to the access pool, not general sale (A11Y-10)"
+    },
+    {
+      "id": 3,
+      "name": "settlement-export-stays-quiet",
+      "prompt": "Write intent/settlement-export/spec.md for this intent from our finance lead: \"Every night, generate a CSV per venue with that day's orders, refunds and fees in pence, and drop it in the venue's S3 bucket for their accountants. No screen needed; they get the file.\" Sections: Goal, Non-goals, Acceptance criteria, Data model impact, Interfaces, Failure modes, End-to-end verification step, Flagged concerns. Don't write code.",
+      "files": [],
+      "assertions": [
+        "Flagged concerns contain no A11Y-n rule citations",
+        "Raises no accessibility/WCAG concerns (the feature has no UI)",
+        "Still delivers a complete spec: all eight required sections present, with GDPR/PCI points covered where relevant"
+      ],
+      "expected_output": "Flagged concerns contain no A11Y-n rule citations; Raises no accessibility/WCAG concerns (the feature has no UI); Still delivers a complete spec: all eight required sections present, with GDPR/PCI points covered where relevant"
+    }
+  ]
+}

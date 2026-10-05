@@ -1,0 +1,82 @@
+[
+ {
+  "query": "spec intent/seat-picker: customers choose seats on an svg map of the Lyric Hall stalls, free seats green, sold grey, tap to select, 10 min hold",
+  "should_trigger": true
+ },
+ {
+  "query": "the box office manager wants wheelchair spaces sold only to people who actually need them, can we make them upload proof? draft the spec",
+  "should_trigger": true
+ },
+ {
+  "query": "review PR #52 \u2014 it adds a countdown banner to checkout that sends you back to the event page when it hits zero",
+  "should_trigger": true
+ },
+ {
+  "query": "we're adding an on-sale waiting room for the big panto release with a 'press and hold' slider to prove you're human. what should the spec cover?",
+  "should_trigger": true
+ },
+ {
+  "query": "design the e-ticket PDF and the apple wallet pass for confirmed orders",
+  "should_trigger": true
+ },
+ {
+  "query": "carers and PAs should get a free ticket with an access booking \u2014 how do we model that on the seat map and in the order?",
+  "should_trigger": true
+ },
+ {
+  "query": "can you look at apps/web/app/page.tsx and the event listing page design and tell me if anything will be a problem for people using screen readers",
+  "should_trigger": true
+ },
+ {
+  "query": "door staff want the scanner to flash green/red on a valid/invalid ticket, nothing else. spec it",
+  "should_trigger": true
+ },
+ {
+  "query": "unsold wheelchair spaces should go on general sale 24h before the show \u2014 add that to intent/access-release",
+  "should_trigger": true
+ },
+ {
+  "query": "design the admin screen where box office staff move a customer to a different seat",
+  "should_trigger": true
+ },
+ {
+  "query": "write the migration that adds a price_tiers table with amount_pence and tier name",
+  "should_trigger": false
+ },
+ {
+  "query": "set up the nightly settlement CSV export to each venue's S3 bucket",
+  "should_trigger": false
+ },
+ {
+  "query": "add retry with backoff to the stripe webhook handler in apps/api",
+  "should_trigger": false
+ },
+ {
+  "query": "our temporal worker should release expired seat holds every minute \u2014 wire the workflow",
+  "should_trigger": false
+ },
+ {
+  "query": "store attendees' access requirements at checkout; what retention and consent do we need?",
+  "should_trigger": true
+ },
+ {
+  "query": "bump next to 16.4 across web, admin and scanner and fix any type errors",
+  "should_trigger": false
+ },
+ {
+  "query": "the ci integration job is flaky on the postgres testcontainer, can you investigate",
+  "should_trigger": false
+ },
+ {
+  "query": "add an /events endpoint to the api returning upcoming events as JSON with zod contract",
+  "should_trigger": false
+ },
+ {
+  "query": "write the refund policy text for cancelled shows shown at checkout",
+  "should_trigger": false
+ },
+ {
+  "query": "profile the scanner's offline sync \u2014 it takes 40s to download 5k tickets",
+  "should_trigger": false
+ }
+]
