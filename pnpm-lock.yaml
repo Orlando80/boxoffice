@@ -354,6 +354,9 @@ importers:
 
   packages/contracts:
     dependencies:
+      '@boxoffice/domain':
+        specifier: workspace:*
+        version: link:../domain
       zod:
         specifier: ^4.0.0
         version: 4.6.5
