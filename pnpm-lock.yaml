@@ -367,6 +367,9 @@ importers:
 
   packages/db:
     dependencies:
+      '@boxoffice/domain':
+        specifier: workspace:*
+        version: link:../domain
       drizzle-orm:
         specifier: ^0.45.0
         version: 0.45.3(postgres@3.4.9)

@@ -8,6 +8,13 @@
       "when": 1791156092234,
       "tag": "0000_init",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1791207870328,
+      "tag": "0001_venues-seat-maps",
+      "breakpoints": true
     }
   ]
 }

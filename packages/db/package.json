@@ -12,6 +12,7 @@
     "test:int": "vitest run --root ../.. --config vitest.int.config.ts packages/db"
   },
   "dependencies": {
+    "@boxoffice/domain": "workspace:*",
     "drizzle-orm": "^0.45.0",
     "postgres": "^3.4.7",
     "zod": "^4.0.0"
