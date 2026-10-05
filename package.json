@@ -1,0 +1,29 @@
+{
+  "name": "boxoffice",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@12.9.1",
+  "engines": {
+    "node": "24.x"
+  },
+  "scripts": {
+    "typecheck": "turbo typecheck",
+    "lint": "turbo lint",
+    "test": "vitest run --config vitest.config.ts",
+    "test:int": "node packages/config/docker-preflight.ts && turbo build --filter=./apps/* && vitest run --config vitest.int.config.ts",
+    "db:check": "pnpm --filter @boxoffice/db exec drizzle-kit check",
+    "db:new": "pnpm --filter @boxoffice/db exec drizzle-kit generate --name",
+    "temporal:dev": "node scripts/temporal-dev.mjs",
+    "ci:changed": "node scripts/ci-changed.mjs",
+    "docker:build": "node scripts/docker-build.mjs",
+    "soak": "node -e \"console.log('soak: placeholder until the reservation engine exists')\""
+  },
+  "devDependencies": {
+    "eslint": "^10.12.0",
+    "prettier": "^3.9.9",
+    "turbo": "^2.11.7",
+    "typescript": "^6.0.3",
+    "vitest": "^5.0.3",
+    "yaml": "^2.9.1"
+  }
+}

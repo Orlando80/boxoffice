@@ -1,0 +1,41 @@
+{
+  "$schema": "https://turborepo.com/schema.json",
+  "agentGuidance": false,
+  "globalDependencies": [
+    "turbo.json",
+    "package.json",
+    "pnpm-lock.yaml",
+    "pnpm-workspace.yaml",
+    ".nvmrc",
+    ".github/workflows/ci.yml",
+    "scripts/ci-changed.mjs",
+    "eslint.config.js",
+    "prettier.config.js",
+    "vitest.config.ts",
+    "vitest.int.config.ts",
+    "packages/config/tsconfig.*.json",
+    "packages/config/eslint.config.js",
+    "packages/config/vitest.base.ts",
+    "packages/config/prettier.config.js",
+    ".env.example",
+    ".gitignore",
+    "SECURITY.md",
+    "README.md",
+    ".github/pull_request_template.md",
+    ".github/workflows/deploy.yml"
+  ],
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": [".next/**", "!.next/cache/**", "dist/**"]
+    },
+    "typecheck": {
+      "dependsOn": ["^typecheck"]
+    },
+    "lint": {},
+    "test": {},
+    "test:int": {
+      "cache": false
+    }
+  }
+}

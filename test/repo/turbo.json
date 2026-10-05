@@ -1,0 +1,17 @@
+{
+  "$schema": "https://turborepo.com/schema.json",
+  "extends": ["//"],
+  "tasks": {
+    "test": {
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/apps/*/Dockerfile",
+        "$TURBO_ROOT$/apps/*/src/**",
+        "$TURBO_ROOT$/packages/*/src/**",
+        "$TURBO_ROOT$/packages/config/next-run.mjs",
+        "$TURBO_ROOT$/.dockerignore",
+        "$TURBO_ROOT$/scripts/**"
+      ]
+    }
+  }
+}

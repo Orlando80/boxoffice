@@ -1,0 +1,19 @@
+{
+  "name": "@boxoffice/repo-tests",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "vitest run --passWithNoTests"
+  },
+  "devDependencies": {
+    "@boxoffice/admin": "workspace:*",
+    "@boxoffice/api": "workspace:*",
+    "@boxoffice/config": "workspace:*",
+    "@boxoffice/contracts": "workspace:*",
+    "@boxoffice/db": "workspace:*",
+    "@boxoffice/domain": "workspace:*",
+    "@boxoffice/scanner": "workspace:*",
+    "@boxoffice/web": "workspace:*",
+    "@boxoffice/worker": "workspace:*"
+  }
+}
