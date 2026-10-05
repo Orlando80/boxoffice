@@ -8,6 +8,7 @@
   "scripts": {
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
+    "seed": "tsx src/seed/run.ts",
     "test": "vitest run --passWithNoTests",
     "test:int": "vitest run --root ../.. --config vitest.int.config.ts packages/db"
   },
@@ -21,6 +22,7 @@
     "@boxoffice/config": "workspace:*",
     "@testcontainers/postgresql": "^12.2.0",
     "@types/node": "^24.19.1",
+    "tsx": "^4.20.0",
     "drizzle-kit": "^0.31.0",
     "testcontainers": "^12.2.0"
   }

@@ -12,6 +12,7 @@
     "test": "vitest run --config vitest.config.ts",
     "test:int": "node packages/config/docker-preflight.ts && turbo build --filter=./apps/* && vitest run --config vitest.int.config.ts",
     "db:check": "pnpm --filter @boxoffice/db exec drizzle-kit check",
+    "db:seed": "pnpm --filter @boxoffice/db seed",
     "db:new": "pnpm --filter @boxoffice/db exec drizzle-kit generate --name",
     "temporal:dev": "node scripts/temporal-dev.mjs",
     "ci:changed": "node scripts/ci-changed.mjs",
