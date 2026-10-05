@@ -1,4 +1,6 @@
 import { spawnSync } from "node:child_process";
+import { resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
 export const DOCKER_DOWN_MESSAGE = "Docker is not running (required by pnpm test:int)";
 
@@ -18,4 +20,14 @@ export function assertDockerRunning(timeoutMs = 8_000): void {
 // Vitest globalSetup entry: fails the whole int run once, fast.
 export default function setup(): void {
   assertDockerRunning();
+}
+
+// CLI entry (`node packages/config/docker-preflight.ts`): run before slow builds.
+if (process.argv[1] && fileURLToPath(import.meta.url) === resolve(process.argv[1])) {
+  try {
+    assertDockerRunning();
+  } catch (e) {
+    console.error((e as Error).message);
+    process.exit(1);
+  }
 }

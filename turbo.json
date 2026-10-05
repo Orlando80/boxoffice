@@ -16,7 +16,13 @@
     "packages/config/tsconfig.*.json",
     "packages/config/eslint.config.js",
     "packages/config/vitest.base.ts",
-    "packages/config/prettier.config.js"
+    "packages/config/prettier.config.js",
+    ".env.example",
+    ".gitignore",
+    "SECURITY.md",
+    "README.md",
+    ".github/pull_request_template.md",
+    ".github/workflows/deploy.yml.proposed"
   ],
   "tasks": {
     "build": {

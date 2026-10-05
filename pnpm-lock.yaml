@@ -402,7 +402,35 @@ importers:
         specifier: ^24.19.1
         version: 24.19.1
 
-  test/repo: {}
+  test/repo:
+    devDependencies:
+      '@boxoffice/admin':
+        specifier: workspace:*
+        version: link:../../apps/admin
+      '@boxoffice/api':
+        specifier: workspace:*
+        version: link:../../apps/api
+      '@boxoffice/config':
+        specifier: workspace:*
+        version: link:../../packages/config
+      '@boxoffice/contracts':
+        specifier: workspace:*
+        version: link:../../packages/contracts
+      '@boxoffice/db':
+        specifier: workspace:*
+        version: link:../../packages/db
+      '@boxoffice/domain':
+        specifier: workspace:*
+        version: link:../../packages/domain
+      '@boxoffice/scanner':
+        specifier: workspace:*
+        version: link:../../apps/scanner
+      '@boxoffice/web':
+        specifier: workspace:*
+        version: link:../../apps/web
+      '@boxoffice/worker':
+        specifier: workspace:*
+        version: link:../../apps/worker
 
 packages:
 
