@@ -15,6 +15,7 @@
     "db:new": "pnpm --filter @boxoffice/db exec drizzle-kit generate --name",
     "temporal:dev": "node scripts/temporal-dev.mjs",
     "ci:changed": "node scripts/ci-changed.mjs",
+    "docker:build": "node scripts/docker-build.mjs",
     "soak": "node -e \"console.log('soak: placeholder until the reservation engine exists')\""
   },
   "devDependencies": {
