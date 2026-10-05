@@ -135,7 +135,11 @@ describe(".env.example (AC 20)", () => {
 
 describe("repo hygiene", () => {
   it("SECURITY.md is unchanged vs main (AC)", () => {
-    expect(git(["diff", "--quiet", "main", "--", "SECURITY.md"]).status).toBe(0);
+    const base = ["origin/main", "main"].find(
+      (ref) => git(["rev-parse", "--verify", "--quiet", ref]).status === 0,
+    );
+    if (!base) throw new Error("no main ref; fetch origin main");
+    expect(git(["diff", "--quiet", base, "--", "SECURITY.md"]).status).toBe(0);
   });
   it(".env is ignored and .env.example is not", () => {
     expect(git(["check-ignore", "-q", ".env"]).status).toBe(0);
