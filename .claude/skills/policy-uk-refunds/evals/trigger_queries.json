@@ -1,0 +1,82 @@
+[
+ {
+  "query": "the comedy night at the Corn Exchange on 14 Nov is cancelled, the act is ill \u2014 what do we owe the 340 buyers and how should the refund run work?",
+  "should_trigger": true
+ },
+ {
+  "query": "spec intent/postpone-event: let box office move a show to a new date and tell customers",
+  "should_trigger": true
+ },
+ {
+  "query": "we want to add a \u00a31.75 booking fee per ticket \u2014 where should it show up on the site?",
+  "should_trigger": true
+ },
+ {
+  "query": "design the checkout summary and the order confirmation email",
+  "should_trigger": true
+ },
+ {
+  "query": "customer emailed asking to swap their saturday tickets for friday, what should our exchange feature allow?",
+  "should_trigger": true
+ },
+ {
+  "query": "review PR #61 \u2014 adds partial refunds to the admin app, staff can refund individual tickets from an order",
+  "should_trigger": true
+ },
+ {
+  "query": "marketing wants to offer festival credit vouchers instead of refunds when shows are cancelled. thoughts?",
+  "should_trigger": true
+ },
+ {
+  "query": "draft the terms & conditions page content for ticket purchases",
+  "should_trigger": true
+ },
+ {
+  "query": "can people resell their tickets to friends through our platform? sketch how that'd work",
+  "should_trigger": true
+ },
+ {
+  "query": "the venue changed the support act \u2014 do we need to offer refunds? spec intent/lineup-change",
+  "should_trigger": true
+ },
+ {
+  "query": "set up the nightly settlement CSV export to each venue's S3 bucket",
+  "should_trigger": false
+ },
+ {
+  "query": "add retry with backoff to the stripe webhook handler in apps/api",
+  "should_trigger": false
+ },
+ {
+  "query": "write the migration that adds a refunds table \u2014 just the schema, amounts in pence",
+  "should_trigger": false
+ },
+ {
+  "query": "design the seat map colours and keyboard navigation for the stalls",
+  "should_trigger": false
+ },
+ {
+  "query": "store attendees' access requirements at checkout; what retention and consent do we need?",
+  "should_trigger": false
+ },
+ {
+  "query": "bump next to 16.4 across web, admin and scanner and fix any type errors",
+  "should_trigger": false
+ },
+ {
+  "query": "the scanner should work offline at the door \u2014 design the sync",
+  "should_trigger": false
+ },
+ {
+  "query": "add an /events endpoint to the api returning upcoming events as JSON with zod contract",
+  "should_trigger": false
+ },
+ {
+  "query": "rotate the stripe webhook signing secret in fly and github",
+  "should_trigger": false
+ },
+ {
+  "query": "profile the checkout page \u2014 LCP is 4s on mobile",
+  "should_trigger": false
+ }
+]
