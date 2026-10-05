@@ -1,0 +1,57 @@
+{
+  "skill_name": "policy-uk-refunds",
+  "evals": [
+    {
+      "id": 0,
+      "name": "cancelled-festival-credit-only",
+      "prompt": "Write intent/festival-cancellation/spec.md for this intent from our head of events: \"When an outdoor show is called off for weather, don't refund cards: issue every buyer a credit voucher for the ticket price, valid 12 months at the same venue. We keep the booking fee because the booking was still processed.\" Sections: Goal, Non-goals, Acceptance criteria, Data model impact, Interfaces, Failure modes, End-to-end verification step, Flagged concerns. Don't write code.",
+      "expected_output": "Flagged concerns cite UKR rule IDs (e.g. 'UKR-3'); Flags credit-only (no cash refund) for a cancelled event as conflicting with the refund requirement, for owner decision rather than designing it in; Flags keeping the booking fee on a cancelled event as conflicting with refunding everything paid, for owner decision; Does not specify voucher-instead-of-refund as the accepted design (vouchers at most as an optional alternative alongside cash); Refunds go to the original payment method via Stripe and amounts are integer pence",
+      "files": [],
+      "assertions": [
+        "Flagged concerns cite UKR rule IDs (e.g. 'UKR-3')",
+        "Flags credit-only (no cash refund) for a cancelled event as conflicting with the refund requirement, for owner decision rather than designing it in",
+        "Flags keeping the booking fee on a cancelled event as conflicting with refunding everything paid, for owner decision",
+        "Does not specify voucher-instead-of-refund as the accepted design (vouchers at most as an optional alternative alongside cash)",
+        "Refunds go to the original payment method via Stripe and amounts are integer pence"
+      ]
+    },
+    {
+      "id": 1,
+      "name": "checkout-fee-and-footer-terms",
+      "prompt": "Write intent/service-fee/spec.md for this intent from our commercial director: \"Add a \u00a32.50 per-ticket service fee. Show it as a separate line on the final payment step so the listing and seat-map prices stay attractive. Put a link to the terms in the footer.\" Sections: Goal, Non-goals, Acceptance criteria, Data model impact, Interfaces, Failure modes, End-to-end verification step, Flagged concerns. Don't write code.",
+      "expected_output": "Flagged concerns cite UKR rule IDs (e.g. 'UKR-6'); Flags adding a mandatory fee only at the final checkout step as drip pricing, requiring it in the headline price from listings and seat maps on, for owner decision rather than designing it in; Requires refund/exchange terms to be shown before payment (not only a footer link) and repeated in the confirmation; Fee and totals are computed in integer pence via packages/domain/money.ts (no floats)",
+      "files": [],
+      "assertions": [
+        "Flagged concerns cite UKR rule IDs (e.g. 'UKR-6')",
+        "Flags adding a mandatory fee only at the final checkout step as drip pricing, requiring it in the headline price from listings and seat maps on, for owner decision rather than designing it in",
+        "Requires refund/exchange terms to be shown before payment (not only a footer link) and repeated in the confirmation",
+        "Fee and totals are computed in integer pence via packages/domain/money.ts (no floats)"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "reschedule-auto-transfer",
+      "prompt": "Write intent/reschedule/spec.md for this intent from our box-office manager: \"When a headliner postpones, move every ticket to the new date automatically and email people the new date. No refunds; they can sell their tickets on if they can't make it.\" Sections: Goal, Non-goals, Acceptance criteria, Data model impact, Interfaces, Failure modes, End-to-end verification step, Flagged concerns. Don't write code.",
+      "expected_output": "Flagged concerns cite UKR rule IDs (e.g. 'UKR-4'); Flags moving tickets with no refund option as conflicting with the keep-or-refund choice, for owner decision rather than designing it in; Gives (or requires) each affected order a choice with a decision window of at least 14 days, refund including fees; Flags 'they can sell their tickets on' (resale/transfer) as needing its own owner decision",
+      "files": [],
+      "assertions": [
+        "Flagged concerns cite UKR rule IDs (e.g. 'UKR-4')",
+        "Flags moving tickets with no refund option as conflicting with the keep-or-refund choice, for owner decision rather than designing it in",
+        "Gives (or requires) each affected order a choice with a decision window of at least 14 days, refund including fees",
+        "Flags 'they can sell their tickets on' (resale/transfer) as needing its own owner decision"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "venue-onboarding-stays-quiet",
+      "prompt": "Write intent/venue-onboarding/spec.md for this intent from our ops lead: \"Admins need a form to add a new venue: name, address, logo and the seating plan file, saved as a draft until they publish it.\" Sections: Goal, Non-goals, Acceptance criteria, Data model impact, Interfaces, Failure modes, End-to-end verification step, Flagged concerns. Don't write code.",
+      "expected_output": "Flagged concerns contain no UKR-n rule citations; Raises no refund, fee-display or consumer-terms concerns; Still delivers a complete spec: all eight required sections present",
+      "files": [],
+      "assertions": [
+        "Flagged concerns contain no UKR-n rule citations",
+        "Raises no refund, fee-display or consumer-terms concerns",
+        "Still delivers a complete spec: all eight required sections present"
+      ]
+    }
+  ]
+}
