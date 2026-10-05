@@ -221,6 +221,12 @@ importers:
       '@boxoffice/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
+      '@boxoffice/db':
+        specifier: workspace:*
+        version: link:../../packages/db
+      drizzle-orm:
+        specifier: ^0.45.0
+        version: 0.45.3(postgres@3.4.9)
       fastify:
         specifier: ^5.5.0
         version: 5.12.5
@@ -234,9 +240,15 @@ importers:
       '@boxoffice/config':
         specifier: workspace:*
         version: link:../../packages/config
+      '@testcontainers/postgresql':
+        specifier: ^12.2.0
+        version: 12.2.0(supports-color@8.1.1)
       '@types/node':
         specifier: ^24.19.1
         version: 24.19.1
+      testcontainers:
+        specifier: ^12.2.0
+        version: 12.2.0(supports-color@8.1.1)
       tsx:
         specifier: ^4.20.0
         version: 4.23.15

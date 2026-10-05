@@ -27,18 +27,20 @@ describe("queries venue-scoping convention (AC 9)", () => {
 
   it("the exported query set is the known one (new exports must be reviewed)", () => {
     expect(Object.keys(queries).sort()).toEqual(
-      ["getEvent", "getLayoutView", "getVenue", "listEvents", "listVenues"].sort(),
+      ["getEvent", "getLayoutView", "getVenue", "listEvents", "listLayouts", "listVenues"].sort(),
     );
   });
 
   it("scoped queries take venueId: string as the second parameter", () => {
     expectTypeOf<Parameters<typeof queries.getVenue>[1]>().toEqualTypeOf<string>();
     expectTypeOf<Parameters<typeof queries.listEvents>[1]>().toEqualTypeOf<string>();
+    expectTypeOf<Parameters<typeof queries.listLayouts>[1]>().toEqualTypeOf<string>();
     expectTypeOf<Parameters<typeof queries.getEvent>[1]>().toEqualTypeOf<string>();
     expectTypeOf<Parameters<typeof queries.getLayoutView>[1]>().toEqualTypeOf<string>();
     // venueId is required, not optional
     expectTypeOf<Parameters<typeof queries.getVenue>["length"]>().toEqualTypeOf<2>();
     expectTypeOf<Parameters<typeof queries.listEvents>["length"]>().toEqualTypeOf<2>();
+    expectTypeOf<Parameters<typeof queries.listLayouts>["length"]>().toEqualTypeOf<2>();
     expectTypeOf<Parameters<typeof queries.getEvent>["length"]>().toEqualTypeOf<3>();
     expectTypeOf<Parameters<typeof queries.getLayoutView>["length"]>().toEqualTypeOf<3>();
   });

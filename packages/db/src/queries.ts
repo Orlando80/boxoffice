@@ -98,6 +98,19 @@ export async function getVenue(db: Db, venueId: string): Promise<VenueRow | null
   return rows[0] ?? null;
 }
 
+export interface LayoutRow {
+  id: string;
+  name: string;
+}
+
+export async function listLayouts(db: Db, venueId: string): Promise<LayoutRow[]> {
+  return db
+    .select({ id: layout.id, name: layout.name })
+    .from(layout)
+    .where(eq(layout.venueId, venueId))
+    .orderBy(asc(layout.name));
+}
+
 const eventColumns = {
   id: event.id,
   venueId: event.venueId,
