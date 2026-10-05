@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "node ../../packages/config/next-run.mjs 3001 dev",
     "build": "next build",
-    "start": "node ../../packages/config/next-run.mjs 3001 start",
+    "start": "node ../../packages/config/next-run.mjs 3001 serve",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "test": "vitest run --passWithNoTests"

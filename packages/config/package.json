@@ -10,6 +10,7 @@
     "./vitest.base": "./vitest.base.ts",
     "./vitest.next": "./vitest.next.ts",
     "./docker-preflight": "./docker-preflight.ts",
+    "./serve-app": "./serve-app.ts",
     "./prettier": "./prettier.config.js"
   },
   "scripts": {
