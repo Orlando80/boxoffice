@@ -1,0 +1,632 @@
+{
+  "id": "31214218-2f42-49d7-9ed0-c83a3057cad8",
+  "prevId": "05d6b2c6-101c-4e33-8fed-e1081f6664e2",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.companion_link": {
+      "name": "companion_link",
+      "schema": "",
+      "columns": {
+        "venue_id": {
+          "name": "venue_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "access_seat_id": {
+          "name": "access_seat_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "companion_seat_id": {
+          "name": "companion_seat_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "companion_link_access_seat_fk": {
+          "name": "companion_link_access_seat_fk",
+          "tableFrom": "companion_link",
+          "tableTo": "seat",
+          "columnsFrom": [
+            "venue_id",
+            "access_seat_id"
+          ],
+          "columnsTo": [
+            "venue_id",
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "companion_link_companion_seat_fk": {
+          "name": "companion_link_companion_seat_fk",
+          "tableFrom": "companion_link",
+          "tableTo": "seat",
+          "columnsFrom": [
+            "venue_id",
+            "companion_seat_id"
+          ],
+          "columnsTo": [
+            "venue_id",
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "companion_link_access_seat_id_unique": {
+          "name": "companion_link_access_seat_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "access_seat_id"
+          ]
+        },
+        "companion_link_companion_seat_id_unique": {
+          "name": "companion_link_companion_seat_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "companion_seat_id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "companion_link_distinct_ck": {
+          "name": "companion_link_distinct_ck",
+          "value": "\"companion_link\".\"access_seat_id\" <> \"companion_link\".\"companion_seat_id\""
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.event": {
+      "name": "event",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "venue_id": {
+          "name": "venue_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "slug": {
+          "name": "slug",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "running_time_minutes": {
+          "name": "running_time_minutes",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "age_guidance": {
+          "name": "age_guidance",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "event_venue_fk": {
+          "name": "event_venue_fk",
+          "tableFrom": "event",
+          "tableTo": "venue",
+          "columnsFrom": [
+            "venue_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "event_venue_id_id_uq": {
+          "name": "event_venue_id_id_uq",
+          "nullsNotDistinct": false,
+          "columns": [
+            "venue_id",
+            "id"
+          ]
+        },
+        "event_venue_slug_uq": {
+          "name": "event_venue_slug_uq",
+          "nullsNotDistinct": false,
+          "columns": [
+            "venue_id",
+            "slug"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.layout": {
+      "name": "layout",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "venue_id": {
+          "name": "venue_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "layout_venue_fk": {
+          "name": "layout_venue_fk",
+          "tableFrom": "layout",
+          "tableTo": "venue",
+          "columnsFrom": [
+            "venue_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "layout_venue_id_id_uq": {
+          "name": "layout_venue_id_id_uq",
+          "nullsNotDistinct": false,
+          "columns": [
+            "venue_id",
+            "id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.performance": {
+      "name": "performance",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "venue_id": {
+          "name": "venue_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "event_id": {
+          "name": "event_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "layout_id": {
+          "name": "layout_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "starts_at": {
+          "name": "starts_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "access_tags": {
+          "name": "access_tags",
+          "type": "performance_access_tag[]",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "performance_event_fk": {
+          "name": "performance_event_fk",
+          "tableFrom": "performance",
+          "tableTo": "event",
+          "columnsFrom": [
+            "venue_id",
+            "event_id"
+          ],
+          "columnsTo": [
+            "venue_id",
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "performance_layout_fk": {
+          "name": "performance_layout_fk",
+          "tableFrom": "performance",
+          "tableTo": "layout",
+          "columnsFrom": [
+            "venue_id",
+            "layout_id"
+          ],
+          "columnsTo": [
+            "venue_id",
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.seat": {
+      "name": "seat",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "venue_id": {
+          "name": "venue_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "section_id": {
+          "name": "section_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "row_label": {
+          "name": "row_label",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "seat_label": {
+          "name": "seat_label",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "x": {
+          "name": "x",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "y": {
+          "name": "y",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "seat_section_fk": {
+          "name": "seat_section_fk",
+          "tableFrom": "seat",
+          "tableTo": "section",
+          "columnsFrom": [
+            "venue_id",
+            "section_id"
+          ],
+          "columnsTo": [
+            "venue_id",
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "seat_venue_id_id_uq": {
+          "name": "seat_venue_id_id_uq",
+          "nullsNotDistinct": false,
+          "columns": [
+            "venue_id",
+            "id"
+          ]
+        },
+        "seat_section_row_seat_uq": {
+          "name": "seat_section_row_seat_uq",
+          "nullsNotDistinct": false,
+          "columns": [
+            "section_id",
+            "row_label",
+            "seat_label"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.seat_access_feature": {
+      "name": "seat_access_feature",
+      "schema": "",
+      "columns": {
+        "venue_id": {
+          "name": "venue_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "seat_id": {
+          "name": "seat_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "feature": {
+          "name": "feature",
+          "type": "access_feature",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "seat_access_feature_seat_fk": {
+          "name": "seat_access_feature_seat_fk",
+          "tableFrom": "seat_access_feature",
+          "tableTo": "seat",
+          "columnsFrom": [
+            "venue_id",
+            "seat_id"
+          ],
+          "columnsTo": [
+            "venue_id",
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "seat_access_feature_uq": {
+          "name": "seat_access_feature_uq",
+          "nullsNotDistinct": false,
+          "columns": [
+            "seat_id",
+            "feature"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.section": {
+      "name": "section",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "venue_id": {
+          "name": "venue_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "layout_id": {
+          "name": "layout_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "kind": {
+          "name": "kind",
+          "type": "section_kind",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "ga_capacity": {
+          "name": "ga_capacity",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "section_layout_fk": {
+          "name": "section_layout_fk",
+          "tableFrom": "section",
+          "tableTo": "layout",
+          "columnsFrom": [
+            "venue_id",
+            "layout_id"
+          ],
+          "columnsTo": [
+            "venue_id",
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "section_venue_id_id_uq": {
+          "name": "section_venue_id_id_uq",
+          "nullsNotDistinct": false,
+          "columns": [
+            "venue_id",
+            "id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "section_ga_capacity_ck": {
+          "name": "section_ga_capacity_ck",
+          "value": "(\"section\".\"kind\" = 'ga') = (\"section\".\"ga_capacity\" IS NOT NULL) AND (\"section\".\"ga_capacity\" IS NULL OR \"section\".\"ga_capacity\" >= 1)"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.venue": {
+      "name": "venue",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "slug": {
+          "name": "slug",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "time_zone": {
+          "name": "time_zone",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "venue_slug_unique": {
+          "name": "venue_slug_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "slug"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {
+    "public.access_feature": {
+      "name": "access_feature",
+      "schema": "public",
+      "values": [
+        "wheelchair_space",
+        "transfer_seat",
+        "step_free",
+        "aisle",
+        "extra_legroom",
+        "hearing_loop",
+        "near_exit"
+      ]
+    },
+    "public.performance_access_tag": {
+      "name": "performance_access_tag",
+      "schema": "public",
+      "values": [
+        "relaxed",
+        "captioned",
+        "bsl_interpreted",
+        "audio_described"
+      ]
+    },
+    "public.section_kind": {
+      "name": "section_kind",
+      "schema": "public",
+      "values": [
+        "reserved",
+        "ga"
+      ]
+    }
+  },
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

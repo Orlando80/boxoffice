@@ -26,13 +26,13 @@ function freePort(): Promise<number> {
  */
 export async function startApp(
   appDir: string,
-  { timeoutMs = 60_000 }: { timeoutMs?: number } = {},
+  { timeoutMs = 60_000, env = {} }: { timeoutMs?: number; env?: Record<string, string> } = {},
 ): Promise<RunningApp> {
   const port = await freePort();
   const launcher = path.resolve(import.meta.dirname, "next-run.mjs");
   const child = spawn(process.execPath, [launcher, String(port), "serve"], {
     cwd: appDir,
-    env: { ...process.env, PORT: String(port), NODE_ENV: "production" },
+    env: { ...process.env, ...env, PORT: String(port), NODE_ENV: "production" },
     stdio: ["ignore", "pipe", "pipe"],
     detached: process.platform !== "win32",
   });

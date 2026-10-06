@@ -11,6 +11,7 @@
     "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
+    "@boxoffice/domain": "workspace:*",
     "zod": "^4.0.0"
   },
   "devDependencies": {

@@ -17,6 +17,7 @@ intent  →  spec  →  plan  →  implement  →  ship  →  maintain
 /intent   /spec    /plan    /implement    /ship    alerts → new intent
 ```
 
+<!-- prettier-ignore -->
 | Stage | Who | Output | Gate |
 |---|---|---|---|
 | Intent | any originator (box office, finance, marketing, front of house) | `intent/<slug>/intent.md` | owner merges |
@@ -44,13 +45,15 @@ pnpm temporal:dev   # Temporal dev server on localhost:7233, UI on :8233
 
 Copy `.env.example` to `.env` if you need to override defaults.
 
+<!-- prettier-ignore -->
 | Command | What it does |
 |---|---|
 | `pnpm typecheck` | Type-check all packages |
 | `pnpm lint` | Lint all packages |
 | `pnpm test <path>` | Unit tests; pass a path while iterating |
-| `pnpm test:int` | Integration tests (needs Docker) |
+| `pnpm test:int` | Integration tests (needs Docker); also runs browser tests and installs Chromium on first run |
 | `pnpm db:check` | Check migrations are consistent with the schema |
+| `pnpm db:seed` | Migrate and load the invented seed venues into DATABASE_URL |
 | `pnpm db:new <name>` | Generate a new migration (never hand-edit migrations) |
 | `pnpm temporal:dev` | Run a local Temporal dev server |
 | `pnpm soak` | Run the soak check |
@@ -60,6 +63,20 @@ Copy `.env.example` to `.env` if you need to override defaults.
 `pnpm docker:build <app>` wraps `docker build` and passes `NODE_VERSION` read
 from `.nvmrc`. `<app>` is one of api, web, admin, scanner, worker.
 
+### Run the admin locally
+
+> The admin app has no sign-in yet. Its venue picker lists every venue and is for local development only; do not deploy admin until the auth intent lands.
+
+```
+docker run -d --name boxoffice-pg -e POSTGRES_PASSWORD=change-me -p 5433:5432 postgres:17
+export DATABASE_URL=postgres://postgres:change-me@localhost:5433/postgres
+pnpm db:seed
+pnpm --filter @boxoffice/api dev       # needs DATABASE_URL
+pnpm --filter @boxoffice/admin dev     # API_URL defaults to http://localhost:4000
+```
+
+Then open http://localhost:3001.
+
 ## Status
 
 Bootstrapping. See [docs/bootstrap.md](docs/bootstrap.md) for the full brief.
@@ -67,6 +84,7 @@ Bootstrapping. See [docs/bootstrap.md](docs/bootstrap.md) for the full brief.
 ### Intents
 
 - [monorepo-skeleton](intent/monorepo-skeleton/intent.md): workspace, apps, CI and Docker images.
+- [venues-seat-maps](intent/venues-seat-maps/intent.md): venues, events and read-only seat maps in the admin app.
 
 ## Licence
 

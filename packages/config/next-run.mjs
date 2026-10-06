@@ -40,7 +40,7 @@ if (command === "serve") {
   args = [server];
 } else {
   const nextBin = createRequire(`${appDir}/`).resolve("next/dist/bin/next");
-  args = [nextBin, command, "-p", port];
+  args = [nextBin, command, "-p", port, ...process.argv.slice(4)];
 }
 
 const child = spawn(process.execPath, args, { stdio: "inherit", env });

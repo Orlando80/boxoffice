@@ -3,15 +3,18 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./seed": "./src/seed/index.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
+    "seed": "tsx src/seed/run.ts",
     "test": "vitest run --passWithNoTests",
     "test:int": "vitest run --root ../.. --config vitest.int.config.ts packages/db"
   },
   "dependencies": {
+    "@boxoffice/domain": "workspace:*",
     "drizzle-orm": "^0.45.0",
     "postgres": "^3.4.7",
     "zod": "^4.0.0"
@@ -20,6 +23,7 @@
     "@boxoffice/config": "workspace:*",
     "@testcontainers/postgresql": "^12.2.0",
     "@types/node": "^24.19.1",
+    "tsx": "^4.20.0",
     "drizzle-kit": "^0.31.0",
     "testcontainers": "^12.2.0"
   }

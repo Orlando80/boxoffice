@@ -1,14 +1,31 @@
+import { sql } from "drizzle-orm";
+import { createDb } from "@boxoffice/db";
 import { buildApp } from "./app.js";
 import { parseEnv } from "./env.js";
+import { createRepository } from "./repository.js";
 
-const { PORT } = parseEnv(process.env);
-const app = buildApp();
+const { PORT, DATABASE_URL } = parseEnv(process.env);
+const { db, close } = createDb(DATABASE_URL);
+
+try {
+  await db.execute(sql`select 1`);
+} catch {
+  // Log the host only; never credentials or the full URL.
+  console.error(`Database unreachable at host ${new URL(DATABASE_URL).hostname}`);
+  await close().catch(() => undefined);
+  process.exit(1);
+}
+
+const app = buildApp(createRepository(db));
 
 const shutdown = (): void => {
-  app.close().then(
-    () => process.exit(0),
-    () => process.exit(1),
-  );
+  app
+    .close()
+    .then(() => close())
+    .then(
+      () => process.exit(0),
+      () => process.exit(1),
+    );
 };
 process.on("SIGINT", shutdown);
 process.on("SIGTERM", shutdown);

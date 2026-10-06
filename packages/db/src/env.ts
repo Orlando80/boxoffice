@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-const PLACEHOLDER_URL = "postgres://placeholder:placeholder@localhost:5432/placeholder";
+export const PLACEHOLDER_URL = "postgres://placeholder:placeholder@localhost:5432/placeholder";
 
 const schema = z.object({
   DATABASE_URL: z.url().default(PLACEHOLDER_URL),
