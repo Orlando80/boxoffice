@@ -1,14 +1,26 @@
-import { ACCESS_FEATURES, PERFORMANCE_ACCESS_TAGS } from "@boxoffice/domain";
+import {
+  ACCESS_FEATURES,
+  HOLD_STATUSES,
+  MAX_EXTENSIONS,
+  PERFORMANCE_ACCESS_TAGS,
+  SEAT_ROLES,
+} from "@boxoffice/domain";
 import { sql } from "drizzle-orm";
 import {
+  bigint,
   check,
+  customType,
   foreignKey,
+  index,
   integer,
+  jsonb,
   pgEnum,
   pgTable,
+  primaryKey,
   text,
   timestamp,
   unique,
+  uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
 
@@ -17,6 +29,12 @@ export const performanceAccessTagEnum = pgEnum("performance_access_tag", [
   ...PERFORMANCE_ACCESS_TAGS,
 ] as [string, ...string[]]);
 export const sectionKindEnum = pgEnum("section_kind", ["reserved", "ga"]);
+export const holdStatusEnum = pgEnum("hold_status", HOLD_STATUSES);
+export const seatRoleEnum = pgEnum("seat_role", SEAT_ROLES);
+
+const bytea = customType<{ data: Buffer; driverData: Buffer }>({
+  dataType: () => "bytea",
+});
 
 export const venue = pgTable("venue", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -160,6 +178,7 @@ export const performance = pgTable(
     accessTags: performanceAccessTagEnum("access_tags").array().notNull().default(sql`'{}'`),
   },
   (t) => [
+    unique("performance_venue_id_id_uq").on(t.venueId, t.id),
     foreignKey({
       name: "performance_event_fk",
       columns: [t.venueId, t.eventId],
@@ -170,5 +189,160 @@ export const performance = pgTable(
       columns: [t.venueId, t.layoutId],
       foreignColumns: [layout.venueId, layout.id],
     }),
+  ],
+);
+
+export const hold = pgTable(
+  "hold",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    venueId: uuid("venue_id").notNull(),
+    performanceId: uuid("performance_id").notNull(),
+    tokenHash: bytea("token_hash").notNull().unique(),
+    status: holdStatusEnum("status").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    extensionsUsed: integer("extensions_used").notNull().default(0),
+    endedAt: timestamp("ended_at", { withTimezone: true }),
+  },
+  (t) => [
+    unique("hold_venue_id_id_performance_uq").on(t.venueId, t.id, t.performanceId),
+    unique("hold_venue_id_id_uq").on(t.venueId, t.id),
+    foreignKey({
+      name: "hold_performance_fk",
+      columns: [t.venueId, t.performanceId],
+      foreignColumns: [performance.venueId, performance.id],
+    }),
+    check("hold_status_ended_at_ck", sql`(${t.status} = 'active') = (${t.endedAt} IS NULL)`),
+    check(
+      "hold_extensions_used_ck",
+      sql`${t.extensionsUsed} BETWEEN 0 AND ${sql.raw(String(MAX_EXTENSIONS))}`,
+    ),
+  ],
+);
+
+export const holdSeat = pgTable(
+  "hold_seat",
+  {
+    venueId: uuid("venue_id").notNull(),
+    holdId: uuid("hold_id").notNull(),
+    performanceId: uuid("performance_id").notNull(),
+    seatId: uuid("seat_id").notNull(),
+    role: seatRoleEnum("role").notNull(),
+    endedAt: timestamp("ended_at", { withTimezone: true }),
+  },
+  (t) => [
+    uniqueIndex("hold_seat_active_uq")
+      .on(t.performanceId, t.seatId)
+      .where(sql`${t.endedAt} IS NULL`),
+    foreignKey({
+      name: "hold_seat_hold_fk",
+      columns: [t.venueId, t.holdId, t.performanceId],
+      foreignColumns: [hold.venueId, hold.id, hold.performanceId],
+    }).onDelete("cascade"),
+    foreignKey({
+      name: "hold_seat_seat_fk",
+      columns: [t.venueId, t.seatId],
+      foreignColumns: [seat.venueId, seat.id],
+    }),
+  ],
+);
+
+export const holdGa = pgTable(
+  "hold_ga",
+  {
+    venueId: uuid("venue_id").notNull(),
+    holdId: uuid("hold_id").notNull(),
+    performanceId: uuid("performance_id").notNull(),
+    sectionId: uuid("section_id").notNull(),
+    quantity: integer("quantity").notNull(),
+    endedAt: timestamp("ended_at", { withTimezone: true }),
+  },
+  (t) => [
+    foreignKey({
+      name: "hold_ga_hold_fk",
+      columns: [t.venueId, t.holdId, t.performanceId],
+      foreignColumns: [hold.venueId, hold.id, hold.performanceId],
+    }).onDelete("cascade"),
+    foreignKey({
+      name: "hold_ga_section_fk",
+      columns: [t.venueId, t.sectionId],
+      foreignColumns: [section.venueId, section.id],
+    }),
+    check("hold_ga_quantity_ck", sql`${t.quantity} >= 1`),
+  ],
+);
+
+export const gaInventory = pgTable(
+  "ga_inventory",
+  {
+    venueId: uuid("venue_id").notNull(),
+    performanceId: uuid("performance_id").notNull(),
+    sectionId: uuid("section_id").notNull(),
+    capacity: integer("capacity").notNull(),
+    held: integer("held").notNull().default(0),
+  },
+  (t) => [
+    primaryKey({ name: "ga_inventory_pk", columns: [t.performanceId, t.sectionId] }),
+    foreignKey({
+      name: "ga_inventory_performance_fk",
+      columns: [t.venueId, t.performanceId],
+      foreignColumns: [performance.venueId, performance.id],
+    }),
+    foreignKey({
+      name: "ga_inventory_section_fk",
+      columns: [t.venueId, t.sectionId],
+      foreignColumns: [section.venueId, section.id],
+    }),
+    check("ga_inventory_capacity_ck", sql`${t.capacity} >= 1`),
+    check("ga_inventory_held_ck", sql`${t.held} BETWEEN 0 AND ${t.capacity}`),
+  ],
+);
+
+export const holdAccessNeed = pgTable(
+  "hold_access_need",
+  {
+    venueId: uuid("venue_id").notNull(),
+    holdId: uuid("hold_id").notNull(),
+    seatId: uuid("seat_id").notNull(),
+    need: accessFeatureEnum("need").notNull(),
+  },
+  (t) => [
+    foreignKey({
+      name: "hold_access_need_hold_fk",
+      columns: [t.venueId, t.holdId],
+      foreignColumns: [hold.venueId, hold.id],
+    }).onDelete("cascade"),
+    foreignKey({
+      name: "hold_access_need_seat_fk",
+      columns: [t.venueId, t.seatId],
+      foreignColumns: [seat.venueId, seat.id],
+    }),
+  ],
+);
+
+export const outbox = pgTable(
+  "outbox",
+  {
+    id: bigint("id", { mode: "number" }).primaryKey().generatedAlwaysAsIdentity(),
+    venueId: uuid("venue_id").notNull(),
+    type: text("type").notNull(),
+    aggregateId: uuid("aggregate_id").notNull(),
+    payload: jsonb("payload").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    publishedAt: timestamp("published_at", { withTimezone: true }),
+    attempts: integer("attempts").notNull().default(0),
+    nextAttemptAt: timestamp("next_attempt_at", { withTimezone: true }).notNull().defaultNow(),
+    lastError: text("last_error"),
+  },
+  (t) => [
+    foreignKey({
+      name: "outbox_venue_fk",
+      columns: [t.venueId],
+      foreignColumns: [venue.id],
+    }),
+    index("outbox_unpublished_idx")
+      .on(t.nextAttemptAt, t.id)
+      .where(sql`${t.publishedAt} IS NULL`),
   ],
 );
