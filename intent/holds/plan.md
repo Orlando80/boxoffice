@@ -1,6 +1,6 @@
 # Plan: holds with Temporal timers (create, expire, release)
 
-Status: draft (plan questions Q1–Q10 pending owner)
+Status: approved (owner accepted Q1–Q10 recommendations, 2026-10-06)
 Intent: [intent.md](intent.md) · Spec: [spec.md](spec.md)
 Date: 2026-10-06
 
@@ -11,9 +11,9 @@ else, including test helpers under `src/`, `test/support/` or
 `packages/config`.
 
 Steps marked **⚑Qn** depend on a plan question below. Implement the
-recommended option unless the owner says otherwise.
+recommended option (accepted by the owner).
 
-## Plan questions
+## Plan questions (resolved: owner accepted every recommendation, 2026-10-06)
 
 **Q1. The spec says the domain purity test covers `reservation` (AC 3).
 It doesn't.** `packages/domain/test/venues/purity.test.ts` reads only
