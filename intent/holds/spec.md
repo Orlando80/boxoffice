@@ -1,6 +1,6 @@
 # Spec: holds with Temporal timers (create, expire, release)
 
-Status: draft
+Status: approved
 Intent: [intent.md](intent.md)
 Date: 2026-10-06
 
@@ -436,7 +436,14 @@ Nothing stores money. The only sensitive field is `hold_access_need.need`
     constraint in the new migration. It's additive, and existing data
     already satisfies it.
 
-## Decisions (owner, pending)
+## Decisions (owner, 2026-10-06)
+
+The owner accepted every recommendation below (H-1 to H-9) and the handling
+proposed in Flagged concerns 1–11: the cap is exactly 10 extensions; any
+access feature makes a seat access-only; any need category is accepted for
+any access seat; the domain decides and `packages/db/src/holds.ts` is the
+only writer; the API and worker are never deployed publicly before auth or
+rate limiting; idempotent create is deferred to intent 4.
 
 | #   | Question (intent open question)                 | Recommendation                                                                                                                                                                                                                            |
 | --- | ----------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
