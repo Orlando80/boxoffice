@@ -1,9 +1,12 @@
 import type { AccessFeature, PerformanceAccessTag, SectionKind } from "@boxoffice/domain";
-import { and, asc, eq, inArray } from "drizzle-orm";
+import { and, asc, eq, inArray, sql } from "drizzle-orm";
 import type { Db } from "./client.js";
 import {
   companionLink,
   event,
+  hold,
+  holdGa,
+  holdSeat,
   layout,
   performance,
   seat,
@@ -253,6 +256,123 @@ export async function getLayoutView(
       rows: [...(bySection.get(s.id) ?? new Map<string, SeatView[]>())].map(
         ([label, rowSeats]) => ({ label, seats: rowSeats }),
       ),
+    })),
+  };
+}
+
+export interface PerformanceDetailRow {
+  id: string;
+  venueId: string;
+  eventId: string;
+  eventName: string;
+  startsAt: Date;
+  layoutId: string;
+  accessTags: PerformanceAccessTag[];
+}
+
+export async function getPerformance(
+  db: Db,
+  venueId: string,
+  performanceId: string,
+): Promise<PerformanceDetailRow | null> {
+  const rows = await db
+    .select({
+      id: performance.id,
+      venueId: performance.venueId,
+      eventId: performance.eventId,
+      eventName: event.name,
+      startsAt: performance.startsAt,
+      layoutId: performance.layoutId,
+      accessTags: performance.accessTags,
+    })
+    .from(performance)
+    .innerJoin(event, and(eq(event.venueId, performance.venueId), eq(event.id, performance.eventId)))
+    .where(and(eq(performance.venueId, venueId), eq(performance.id, performanceId)));
+  return (rows[0] as PerformanceDetailRow | undefined) ?? null;
+}
+
+export interface GaAvailability {
+  sectionId: string;
+  held: number;
+  capacity: number;
+}
+
+export interface AvailabilityView {
+  performanceId: string;
+  /** Database clock: the instant the counts are evaluated at. */
+  asOf: Date;
+  heldSeatIds: string[];
+  ga: GaAvailability[];
+}
+
+/**
+ * Three queries regardless of seat count. Only holds that are active and not
+ * yet past expires_at count (H-8). GA is summed from hold_ga, not ga_inventory,
+ * so an overdue-but-unswept hold does not reduce availability.
+ */
+export async function getAvailability(
+  db: Db,
+  venueId: string,
+  performanceId: string,
+): Promise<AvailabilityView | null> {
+  const found = await db
+    .select({
+      layoutId: performance.layoutId,
+      asOf: sql<string>`to_char(now() at time zone 'utc', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"')`,
+    })
+    .from(performance)
+    .where(and(eq(performance.venueId, venueId), eq(performance.id, performanceId)));
+  const perf = found[0];
+  if (perf === undefined) return null;
+  const live = and(
+    eq(hold.venueId, venueId),
+    eq(hold.performanceId, performanceId),
+    eq(hold.status, "active"),
+    sql`${hold.expiresAt} > ${perf.asOf}::timestamptz`,
+  );
+
+  const seatRows = await db
+    .select({ seatId: holdSeat.seatId })
+    .from(holdSeat)
+    .innerJoin(hold, and(eq(hold.venueId, holdSeat.venueId), eq(hold.id, holdSeat.holdId)))
+    .where(and(live, sql`${holdSeat.endedAt} IS NULL`));
+
+  const heldBySection = db
+    .select({
+      sectionId: holdGa.sectionId,
+      held: sql<string>`sum(${holdGa.quantity})`.as("held"),
+    })
+    .from(holdGa)
+    .innerJoin(hold, and(eq(hold.venueId, holdGa.venueId), eq(hold.id, holdGa.holdId)))
+    .where(and(live, sql`${holdGa.endedAt} IS NULL`))
+    .groupBy(holdGa.sectionId)
+    .as("held_by_section");
+
+  const gaRows = await db
+    .select({
+      sectionId: section.id,
+      capacity: section.gaCapacity,
+      held: sql<string | null>`${heldBySection.held}`,
+    })
+    .from(section)
+    .leftJoin(heldBySection, eq(heldBySection.sectionId, section.id))
+    .where(
+      and(
+        eq(section.venueId, venueId),
+        eq(section.layoutId, perf.layoutId),
+        eq(section.kind, "ga"),
+      ),
+    )
+    .orderBy(asc(section.name), asc(section.id));
+
+  return {
+    performanceId,
+    asOf: new Date(perf.asOf),
+    heldSeatIds: seatRows.map((r) => r.seatId).sort(),
+    ga: gaRows.map((r) => ({
+      sectionId: r.sectionId,
+      held: r.held === null ? 0 : Number(r.held),
+      capacity: r.capacity ?? 0,
     })),
   };
 }

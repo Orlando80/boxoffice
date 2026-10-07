@@ -105,7 +105,7 @@ describe("valid samples parse", () => {
     expect(ok(PerformanceSummary, { ...perf, accessTags: [...PERFORMANCE_ACCESS_TAGS] })).toBe(
       true,
     );
-    for (const error of ["not_found", "bad_request", "unavailable"]) {
+    for (const error of ["not_found", "bad_request", "unavailable", "extension_limit", "hold_ended"]) {
       expect(ok(ErrorBody, { error })).toBe(true);
     }
   });
@@ -276,7 +276,7 @@ describe("invalid values rejected", () => {
   });
 
   it("ErrorBody unknown code", () => {
-    for (const error of ["boom", "NOT_FOUND", "", 404, null, undefined]) {
+    for (const error of ["boom", "NOT_FOUND", "", 404, null, undefined, "seats_unavailable", "invalid_hold"]) {
       expect(ok(ErrorBody, { error })).toBe(false);
     }
     expect(ok(ErrorBody, {})).toBe(false);
@@ -330,7 +330,9 @@ describe("types", () => {
     expectTypeOf<EventDetail["performances"]>().toEqualTypeOf<PerformanceSummary[]>();
     expectTypeOf<EventDetail["description"]>().toEqualTypeOf<string | null>();
     expectTypeOf<LayoutView["sections"]>().toEqualTypeOf<SectionView[]>();
-    expectTypeOf<ErrorBody["error"]>().toEqualTypeOf<"not_found" | "bad_request" | "unavailable">();
+    expectTypeOf<ErrorBody["error"]>().toEqualTypeOf<
+      "not_found" | "bad_request" | "unavailable" | "extension_limit" | "hold_ended"
+    >();
     expectTypeOf<VenueDetail["layouts"]>().toEqualTypeOf<LayoutSummary[]>();
     expectTypeOf<VenueDetail["events"]>().toEqualTypeOf<EventSummary[]>();
     expectTypeOf<VenueSummary>().toEqualTypeOf<{

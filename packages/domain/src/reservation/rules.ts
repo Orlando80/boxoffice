@@ -9,24 +9,27 @@ export const MAX_PLACES = 10;
 /** H-5: need categories reuse the access-feature list. */
 export const ACCESS_NEED_CATEGORIES = ACCESS_FEATURES;
 
-export type HoldViolationRule =
-  | "seat_outside_layout"
-  | "ga_section_outside_layout"
-  | "ga_line_on_reserved_section"
-  | "seat_in_ga_section"
-  | "duplicate_seat"
-  | "duplicate_ga_section"
-  | "access_role_on_standard_seat"
-  | "ga_quantity_invalid"
-  | "place_count_out_of_range"
-  | "performance_started"
-  | "access_seat_wrong_role"
-  | "access_need_missing"
-  | "access_need_invalid"
-  | "companion_wrong_role"
-  | "companion_not_linked"
-  | "companion_without_access_seat"
-  | "companion_duplicate_for_access_seat";
+export const HOLD_VIOLATION_RULES = [
+  "seat_outside_layout",
+  "ga_section_outside_layout",
+  "ga_line_on_reserved_section",
+  "seat_in_ga_section",
+  "duplicate_seat",
+  "duplicate_ga_section",
+  "access_role_on_standard_seat",
+  "ga_quantity_invalid",
+  "place_count_out_of_range",
+  "performance_started",
+  "access_seat_wrong_role",
+  "access_need_missing",
+  "access_need_invalid",
+  "companion_wrong_role",
+  "companion_not_linked",
+  "companion_without_access_seat",
+  "companion_duplicate_for_access_seat",
+] as const;
+
+export type HoldViolationRule = (typeof HOLD_VIOLATION_RULES)[number];
 
 export interface HoldViolation {
   readonly rule: HoldViolationRule;

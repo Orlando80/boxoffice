@@ -2,16 +2,20 @@ import { PostgreSqlContainer, type StartedPostgreSqlContainer } from "@testconta
 import postgres from "postgres";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { createDb, type Db } from "../src/client.js";
+import { createHold, releaseHold } from "../src/holds.js";
 import {
+  getAvailability,
   getEvent,
   getLayoutView,
+  getPerformance,
   getVenue,
   listEvents,
   listVenues,
   type LayoutView,
 } from "../src/queries.js";
-import { buildSeed } from "../src/seed/data.js";
+import { buildSeed, seedId } from "../src/seed/data.js";
 import { seedDatabase } from "../src/seed/run.js";
+import { futurePerformance } from "./support/performances.js";
 
 describe("queries against the seeded database", () => {
   let container: StartedPostgreSqlContainer;
@@ -214,5 +218,201 @@ describe("queries against the seeded database", () => {
       "harbour-lane-theatre/End-on": 1200,
       "fernhollow-arena/Concert": 5000,
     });
+  });
+
+  describe("getPerformance and getAvailability (step 5)", () => {
+    const STUDIO = "quillmarsh-studio";
+    const LAYOUT = "Standing and stalls";
+    const STANDING = seedId("section", STUDIO, LAYOUT, "Standing");
+    const seatId = (row: string, n: number) =>
+      seedId("seat", STUDIO, LAYOUT, "Stalls", row, String(n));
+    const UNKNOWN = "00000000-0000-4000-8000-000000000000";
+    const studioPerf = () =>
+      futurePerformance(sql, {
+        venueSlug: STUDIO,
+        eventSlug: "late-night-comedy",
+        layoutName: LAYOUT,
+        daysAhead: 7,
+      });
+    const hold = async (
+      p: { venueId: string; id: string },
+      seats: string[],
+      gaQty = 0,
+    ): Promise<{ holdId: string; token: string }> => {
+      const r = await createHold(
+        db,
+        p.venueId,
+        p.id,
+        {
+          seats: seats.map((s) => ({ seatId: s, role: "standard" as const })),
+          ga: gaQty > 0 ? [{ sectionId: STANDING, quantity: gaQty }] : [],
+        },
+        { lengthSeconds: 600 },
+      );
+      if (!r.ok) throw new Error(JSON.stringify(r.error));
+      return r.value;
+    };
+
+    it("getPerformance returns the row", async () => {
+      const p = await studioPerf();
+      const ev = graph.events.find(
+        (e) => e.venueId === p.venueId && e.slug === "late-night-comedy",
+      )!;
+      const row = await getPerformance(db, p.venueId, p.id);
+      expect(row).not.toBeNull();
+      expect(row!.id).toBe(p.id);
+      expect(row!.venueId).toBe(p.venueId);
+      expect(row!.layoutId).toBe(p.layoutId);
+      expect(row!.eventName).toBe(ev.name);
+      expect(row!.eventId).toBe(ev.id);
+      expect(row!.startsAt).toBeInstanceOf(Date);
+      expect(row!.startsAt.getTime()).toBeGreaterThan(Date.now());
+      expect(Array.isArray(row!.accessTags)).toBe(true);
+    });
+
+    it("getPerformance returns null for unknown and cross-venue ids", async () => {
+      const p = await studioPerf();
+      expect(await getPerformance(db, p.venueId, UNKNOWN)).toBeNull();
+      expect(await getPerformance(db, theatre.id, p.id)).toBeNull();
+      expect(await getPerformance(db, arena.id, p.id)).toBeNull();
+    });
+
+    it("getAvailability returns null for unknown and cross-venue ids", async () => {
+      const p = await studioPerf();
+      expect(await getAvailability(db, p.venueId, UNKNOWN)).toBeNull();
+      expect(await getAvailability(db, theatre.id, p.id)).toBeNull();
+    });
+
+    it("no holds: empty seats, GA held 0 of capacity, asOf near DB now", async () => {
+      const p = await studioPerf();
+      const a = (await getAvailability(db, p.venueId, p.id))!;
+      expect(a.performanceId).toBe(p.id);
+      expect(a.heldSeatIds).toEqual([]);
+      expect(a.ga).toEqual([{ sectionId: STANDING, held: 0, capacity: 200 }]);
+      expect(a.asOf).toBeInstanceOf(Date);
+      expect(Math.abs(a.asOf.getTime() - Date.now())).toBeLessThan(60_000);
+    });
+
+    it("counts active holds; heldSeatIds sorted; GA sums across holds", async () => {
+      const p = await studioPerf();
+      await hold(p, [seatId("C", 5), seatId("A", 2)], 3);
+      await hold(p, [seatId("B", 9), seatId("A", 1)], 4);
+      const a = (await getAvailability(db, p.venueId, p.id))!;
+      const expected = [seatId("C", 5), seatId("A", 2), seatId("B", 9), seatId("A", 1)].sort();
+      expect(a.heldSeatIds).toEqual(expected);
+      expect(a.ga).toEqual([{ sectionId: STANDING, held: 7, capacity: 200 }]);
+    });
+
+    it("holds on another performance of the same layout are not counted", async () => {
+      const p1 = await studioPerf();
+      const p2 = await studioPerf();
+      await hold(p1, [seatId("D", 1)], 5);
+      const a = (await getAvailability(db, p2.venueId, p2.id))!;
+      expect(a.heldSeatIds).toEqual([]);
+      expect(a.ga[0]!.held).toBe(0);
+    });
+
+    it("released holds are not counted", async () => {
+      const p = await studioPerf();
+      const h = await hold(p, [seatId("E", 1)], 6);
+      await hold(p, [seatId("E", 2)], 2);
+      expect(await releaseHold(db, p.venueId, h.holdId, h.token)).not.toBeNull();
+      const a = (await getAvailability(db, p.venueId, p.id))!;
+      expect(a.heldSeatIds).toEqual([seatId("E", 2)]);
+      expect(a.ga[0]!.held).toBe(2);
+    });
+
+    it("an overdue but not ended hold is NOT counted (H-8)", async () => {
+      const p = await studioPerf();
+      const overdue = await hold(p, [seatId("F", 1)], 9);
+      await hold(p, [seatId("F", 2)], 1);
+      await sql`update hold set expires_at = now() - interval '1 minute' where id = ${overdue.holdId}`;
+      const row = await sql<{ status: string; ended_at: Date | null }[]>`
+        select status, ended_at from hold where id = ${overdue.holdId}`;
+      expect(row[0]!.status).toBe("active");
+      expect(row[0]!.ended_at).toBeNull();
+      const a = (await getAvailability(db, p.venueId, p.id))!;
+      expect(a.heldSeatIds).toEqual([seatId("F", 2)]);
+      expect(a.ga[0]!.held).toBe(1);
+    });
+
+    it("expired-status holds are not counted", async () => {
+      const p = await studioPerf();
+      const h = await hold(p, [seatId("G", 1)], 2);
+      await sql`update hold set status = 'expired', ended_at = now() where id = ${h.holdId}`;
+      await sql`update hold_seat set ended_at = now() where hold_id = ${h.holdId}`;
+      await sql`update hold_ga set ended_at = now() where hold_id = ${h.holdId}`;
+      const a = (await getAvailability(db, p.venueId, p.id))!;
+      expect(a.heldSeatIds).toEqual([]);
+      expect(a.ga[0]!.held).toBe(0);
+    });
+
+    it("a hold with expires_at in the future is counted", async () => {
+      const p = await studioPerf();
+      const h = await hold(p, [seatId("H", 1)]);
+      await sql`update hold set expires_at = now() + interval '1 hour' where id = ${h.holdId}`;
+      expect((await getAvailability(db, p.venueId, p.id))!.heldSeatIds).toEqual([seatId("H", 1)]);
+    });
+
+    it("arena: no holds gives 0 held seats, Floor 0 of 500, median of 5 under 1 s", async () => {
+      const p = await futurePerformance(sql, {
+        venueSlug: "fernhollow-arena",
+        eventSlug: "midnight-circuit-live",
+        layoutName: "Concert",
+        daysAhead: 9,
+      });
+      const floor = seedId("section", "fernhollow-arena", "Concert", "Floor");
+      const first = (await getAvailability(db, p.venueId, p.id))!;
+      expect(first.heldSeatIds).toEqual([]);
+      expect(first.ga).toEqual([{ sectionId: floor, held: 0, capacity: 500 }]);
+      const times: number[] = [];
+      for (let i = 0; i < 5; i += 1) {
+        const t = performance.now();
+        await getAvailability(db, p.venueId, p.id);
+        times.push(performance.now() - t);
+      }
+      times.sort((a, b) => a - b);
+      expect(times[2]!).toBeLessThan(1000);
+    });
+
+    it("arena with 1000 held seats stays under 1 s (median of 5) and is sorted", async () => {
+      const p = await futurePerformance(sql, {
+        venueSlug: "fernhollow-arena",
+        eventSlug: "midnight-circuit-live",
+        layoutName: "Concert",
+        daysAhead: 10,
+      });
+      const ids = await sql<{ id: string }[]>`
+        select s.id from seat s join section sec on sec.id = s.section_id
+        where sec.layout_id = ${p.layoutId} and sec.kind = 'reserved'
+          and s.id not in (select seat_id from seat_access_feature)
+          and s.id not in (select companion_seat_id from companion_link)
+          and s.id not in (select access_seat_id from companion_link)
+        order by s.id limit 1000`;
+      for (let i = 0; i < ids.length; i += 10) {
+        const r = await createHold(
+          db,
+          p.venueId,
+          p.id,
+          {
+            seats: ids.slice(i, i + 10).map((x) => ({ seatId: x.id, role: "standard" as const })),
+            ga: [],
+          },
+          { lengthSeconds: 600 },
+        );
+        if (!r.ok) throw new Error(JSON.stringify(r.error));
+      }
+      const times: number[] = [];
+      let last = await getAvailability(db, p.venueId, p.id);
+      for (let i = 0; i < 5; i += 1) {
+        const t = performance.now();
+        last = await getAvailability(db, p.venueId, p.id);
+        times.push(performance.now() - t);
+      }
+      expect(last!.heldSeatIds).toHaveLength(1000);
+      expect(last!.heldSeatIds).toEqual([...last!.heldSeatIds].sort());
+      times.sort((a, b) => a - b);
+      expect(times[2]!).toBeLessThan(1000);
+    }, 120_000);
   });
 }, 300_000);
