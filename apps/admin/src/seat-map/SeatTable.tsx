@@ -9,7 +9,10 @@ export function SeatTable({ model }: { model: LayoutModel }) {
           return (
             <section key={sec.id} aria-labelledby={headingId}>
               <h2 id={headingId}>{sec.name}</h2>
-              <p>General admission, capacity {sec.capacity}.</p>
+              <p>
+                General admission, capacity {sec.capacity}
+                {model.showHeld ? `, ${sec.held} of ${sec.capacity} held` : ""}.
+              </p>
             </section>
           );
         }
@@ -32,6 +35,7 @@ export function SeatTable({ model }: { model: LayoutModel }) {
                     <th scope="col">Seat</th>
                     <th scope="col">Access features</th>
                     <th scope="col">Companion</th>
+                    {model.showHeld && <th scope="col">Status</th>}
                   </tr>
                 </thead>
                 <tbody>
@@ -48,6 +52,7 @@ export function SeatTable({ model }: { model: LayoutModel }) {
                           ...seat.companions.map((l) => `Has companion ${l}`),
                         ].join("; ") || "None"}
                       </td>
+                      {model.showHeld && <td>{seat.held ? "Held" : "Available"}</td>}
                     </tr>
                   ))}
                 </tbody>

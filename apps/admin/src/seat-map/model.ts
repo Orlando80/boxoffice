@@ -1,4 +1,4 @@
-import type { LayoutView } from "@boxoffice/contracts";
+import type { LayoutView, PerformanceAvailability } from "@boxoffice/contracts";
 
 type SeatInput = LayoutView["sections"][number]["rows"][number]["seats"][number];
 export type AccessFeatureName = SeatInput["accessFeatures"][number];
@@ -29,6 +29,8 @@ export type SeatModel = {
   /** Human-readable feature names. */
   featureText: string[];
   marker: Marker;
+  /** Held for this performance (independent of marker). Always false without availability. */
+  held: boolean;
   /** Labels of the access seats this seat is the companion for. */
   companionFor: string[];
   /** Labels of the companion seats attached to this (access) seat. */
@@ -47,6 +49,8 @@ export type GaSectionModel = {
   id: string;
   name: string;
   capacity: number;
+  /** Places currently held (0 without availability). */
+  held: number;
   /** Position in seat units, placed below the reserved seats. */
   x: number;
   y: number;
@@ -65,6 +69,9 @@ export type LayoutModel = {
   bounds: { x: number; y: number; width: number; height: number };
   totals: { seats: number; accessSeats: number; companionSeats: number; gaCapacity: number };
   summary: string;
+  /** True when built with availability (held state is shown). */
+  showHeld: boolean;
+  heldTotals: { seats: number; ga: number };
 };
 
 /** SVG user units per seat unit. */
@@ -74,7 +81,14 @@ const GA_HEIGHT = 6;
 const GA_GAP = 3;
 const GA_MIN_WIDTH = 30;
 
-export function buildModel(layout: LayoutView): LayoutModel {
+export function buildModel(
+  layout: LayoutView,
+  availability?: PerformanceAvailability,
+): LayoutModel {
+  const heldSeatIds = new Set(availability?.heldSeatIds ?? []);
+  const gaHeld = new Map((availability?.ga ?? []).map((g) => [g.sectionId, g.held]));
+  let heldSeats = 0;
+  let heldGa = 0;
   const byId = new Map<string, { label: string; companions: string[] }>();
   for (const sec of layout.sections)
     for (const row of sec.rows)
@@ -104,11 +118,13 @@ export function buildModel(layout: LayoutView): LayoutModel {
     if (sec.kind === "ga") {
       const capacity = sec.gaCapacity ?? 0;
       gaCapacity += capacity;
+      heldGa += gaHeld.get(sec.id) ?? 0;
       const ga: GaSectionModel = {
         kind: "ga",
         id: sec.id,
         name: sec.name,
         capacity,
+        held: gaHeld.get(sec.id) ?? 0,
         x: 0,
         y: 0,
         width: GA_MIN_WIDTH,
@@ -131,6 +147,8 @@ export function buildModel(layout: LayoutView): LayoutModel {
               ? "access"
               : "plain";
         seats += 1;
+        const held = heldSeatIds.has(s.id);
+        if (held) heldSeats += 1;
         if (features.length > 0) accessSeats += 1;
         if (s.companionOf !== null) companionSeats += 1;
         minX = Math.min(minX, s.x);
@@ -149,6 +167,7 @@ export function buildModel(layout: LayoutView): LayoutModel {
           features,
           featureText: features.map((f) => FEATURE_LABELS[f]),
           marker,
+          held,
           companionFor: target ? [target.label] : [],
           companions: info.companions,
         });
@@ -180,11 +199,15 @@ export function buildModel(layout: LayoutView): LayoutModel {
     height: (bottom - (minY - 0.5) + 2 * PAD) * SCALE,
   };
 
-  const summary =
+  const base =
     `Seat map of ${layout.name}: ${seats} reserved ${seats === 1 ? "seat" : "seats"}, ` +
     `${accessSeats} access ${accessSeats === 1 ? "seat" : "seats"}, ` +
     `${companionSeats} companion ${companionSeats === 1 ? "seat" : "seats"}, ` +
     `general admission capacity ${gaCapacity}`;
+  const summary = availability
+    ? `${base}; ${heldSeats} reserved ${heldSeats === 1 ? "seat" : "seats"} held, ` +
+      `${heldGa} general admission ${heldGa === 1 ? "place" : "places"} held`
+    : base;
 
   return {
     id: layout.id,
@@ -194,12 +217,15 @@ export function buildModel(layout: LayoutView): LayoutModel {
     bounds,
     totals: { seats, accessSeats, companionSeats, gaCapacity },
     summary,
+    showHeld: availability !== undefined,
+    heldTotals: { seats: heldSeats, ga: heldGa },
   };
 }
 
 /** Tooltip text, e.g. "Stalls, Row C, Seat 12 — wheelchair space; companion seat Row C, Seat 13". */
 export function seatTitle(seat: SeatModel): string {
   const parts = [...seat.featureText];
+  if (seat.held) parts.push("held");
   for (const c of seat.companions) parts.push(`companion seat ${c}`);
   for (const c of seat.companionFor) parts.push(`companion for ${c}`);
   const base = `${seat.sectionName}, ${seat.label}`;

@@ -39,6 +39,27 @@ function Shape({ marker, cx, cy }: { marker: Marker; cx: number; cy: number }) {
   }
 }
 
+/** Hatch overlay plus an "H" glyph (bottom right) so held combines with any marker. */
+function HeldMark({ marker, cx, cy }: { marker: Marker; cx: number; cy: number }) {
+  return (
+    <>
+      <g className="held-overlay">
+        <Shape marker={marker} cx={cx} cy={cy} />
+      </g>
+      <text
+        className="held-glyph"
+        x={cx + 3.2}
+        y={cy + 4.2}
+        textAnchor="middle"
+        fontSize={3.5}
+        fontWeight={700}
+      >
+        H
+      </text>
+    </>
+  );
+}
+
 function Seat({ seat }: { seat: SeatModel }) {
   const cx = seat.x * SCALE;
   const cy = seat.y * SCALE;
@@ -48,19 +69,21 @@ function Seat({ seat }: { seat: SeatModel }) {
       data-seat-id={seat.id}
       data-features={seat.features.join(" ")}
       data-marker={seat.marker}
+      data-held={seat.held ? "true" : undefined}
     >
       <title>{seatTitle(seat)}</title>
       <Shape marker={seat.marker} cx={cx} cy={cy} />
       {seat.marker !== "plain" && (
-        <text x={cx} y={cy + 2} textAnchor="middle" fontSize={5.5} fontWeight={700}>
+        <text x={cx} y={seat.held ? cy + 1 : cy + 2} textAnchor="middle" fontSize={5.5} fontWeight={700}>
           {GLYPH[seat.marker]}
         </text>
       )}
+      {seat.held && <HeldMark marker={seat.marker} cx={cx} cy={cy} />}
     </g>
   );
 }
 
-function Legend() {
+function Legend({ showHeld }: { showHeld: boolean }) {
   return (
     <>
       <h2>Seat map key</h2>
@@ -86,6 +109,23 @@ function Legend() {
             <span>{text}</span>
           </li>
         ))}
+        {showHeld && (
+          <li>
+            <svg
+              width={24}
+              height={24}
+              viewBox="-12 -12 24 24"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <g className="seat" transform="scale(2)">
+                <Shape marker="plain" cx={0} cy={0} />
+                <HeldMark marker="plain" cx={0} cy={0} />
+              </g>
+            </svg>
+            <span>Held (hatched)</span>
+          </li>
+        )}
         <li>
           <svg width={24} height={24} viewBox="0 0 24 24" aria-hidden="true" focusable="false">
             <rect className="ga-area" x={2} y={6} width={20} height={12} />
@@ -108,10 +148,27 @@ export function SeatMap({ model }: { model: LayoutModel }) {
         bounds={model.bounds}
         label={`${model.summary}. Full details in the seat table below.`}
       >
+        {model.showHeld && (
+          <defs>
+            <pattern
+              id="held-hatch"
+              width={2}
+              height={2}
+              patternUnits="userSpaceOnUse"
+              patternTransform="rotate(45)"
+            >
+              <line className="held-hatch-line" x1={0} y1={0} x2={0} y2={2} />
+            </pattern>
+          </defs>
+        )}
         {model.sections.map((sec) =>
           sec.kind === "ga" ? (
             <g key={sec.id} className="ga" data-ga-id={sec.id}>
-              <title>{`${sec.name}, general admission, capacity ${sec.capacity}`}</title>
+              <title>
+                {model.showHeld
+                  ? `${sec.name}, general admission, ${sec.held} of ${sec.capacity} held`
+                  : `${sec.name}, general admission, capacity ${sec.capacity}`}
+              </title>
               <rect
                 className="ga-area"
                 x={sec.x * SCALE}
@@ -125,7 +182,9 @@ export function SeatMap({ model }: { model: LayoutModel }) {
                 textAnchor="middle"
                 fontSize={7}
               >
-                {`${sec.name} - capacity ${sec.capacity}`}
+                {model.showHeld
+                  ? `${sec.name} - ${sec.held} of ${sec.capacity} held`
+                  : `${sec.name} - capacity ${sec.capacity}`}
               </text>
             </g>
           ) : (
@@ -137,7 +196,7 @@ export function SeatMap({ model }: { model: LayoutModel }) {
           ),
         )}
       </ZoomFrame>
-      <Legend />
+      <Legend showHeld={model.showHeld} />
     </figure>
   );
 }
