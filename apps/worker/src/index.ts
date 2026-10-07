@@ -16,9 +16,8 @@ try {
   await db.execute(sql`select 1`);
 } catch {
   // Log the host only; never credentials or the full URL.
-  console.error(`Database unreachable at host ${dbHost}`);
-  await closeDb().catch(() => undefined);
-  process.exit(1);
+  // Activities fail and Temporal retries them; the relay retries each tick.
+  console.error(`Database unreachable at host ${dbHost}; retrying`);
 }
 
 let connection: NativeConnection;
@@ -43,6 +42,7 @@ const relay = startRelay({
   db,
   client: new Client({ connection: clientConnection, namespace: env.TEMPORAL_NAMESPACE }),
   taskQueue: TASK_QUEUE,
+  dbHost,
 });
 
 const shutdown = (): void => {

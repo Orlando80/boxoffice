@@ -354,6 +354,61 @@ describe("relay loop", () => {
   });
 });
 
+describe("relay db host in failure logs", () => {
+  const secretUrl = "postgres://user:SENTINEL_PW@db.internal:5432/x";
+  const failing = () =>
+    claimDueSpy.mockRejectedValue(
+      Object.assign(new Error(`connect failed ${secretUrl}`), { code: "ECONNREFUSED" }),
+    );
+
+  it("with dbHost, a failing claimDue logs the host and nothing from the error, and the loop continues", async () => {
+    const { client } = fakeClient();
+    const lines: string[] = [];
+    failing();
+    begin(client, { intervalMs: 10, dbHost: "db.internal", log: (l) => void lines.push(l) });
+    await vi.waitFor(() => expect(claimDueSpy.mock.calls.length).toBeGreaterThanOrEqual(3), {
+      timeout: 2000,
+    });
+    expect(lines.length).toBeGreaterThanOrEqual(2);
+    for (const l of lines) {
+      expect(l).toBe("relay tick failed (db host db.internal); will retry");
+      expect(l).not.toContain("SENTINEL_PW");
+      expect(l).not.toContain("postgres://");
+      expect(l).not.toContain("ECONNREFUSED");
+      expect(l).not.toContain("connect failed");
+      expect(l).not.toContain("5432");
+    }
+  });
+
+  it("with dbHost, a housekeeping failure logs the host only", async () => {
+    const { client } = fakeClient();
+    const lines: string[] = [];
+    purgePublished.mockRejectedValue(new Error(secretUrl));
+    begin(client, {
+      intervalMs: 5,
+      housekeepingMs: 20,
+      dbHost: "db.internal",
+      log: (l) => void lines.push(l),
+    });
+    await vi.waitFor(() => expect(lines.some((l) => l.includes("housekeeping"))).toBe(true), {
+      timeout: 2000,
+    });
+    expect(lines.find((l) => l.includes("housekeeping"))).toBe(
+      "relay housekeeping failed (db host db.internal); will retry",
+    );
+    for (const l of lines) expect(l).not.toContain("SENTINEL_PW");
+  });
+
+  it("without dbHost, the old line without a host", async () => {
+    const { client } = fakeClient();
+    const lines: string[] = [];
+    failing();
+    begin(client, { intervalMs: 10, log: (l) => void lines.push(l) });
+    await vi.waitFor(() => expect(lines.length).toBeGreaterThanOrEqual(1), { timeout: 2000 });
+    expect(lines[0]).toBe("relay tick failed; will retry");
+  });
+});
+
 describe("relay abort on timeout", () => {
   it("aborts the signal given to withAbortSignal and fails with delivery_timeout", async () => {
     const { client, start } = fakeClient();

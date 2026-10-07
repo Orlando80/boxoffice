@@ -1,10 +1,4 @@
-import {
-  claimDue,
-  purgeEndedHolds,
-  purgePublished,
-  type Db,
-  type OutboxRow,
-} from "@boxoffice/db";
+import { claimDue, purgeEndedHolds, purgePublished, type Db, type OutboxRow } from "@boxoffice/db";
 import {
   WorkflowExecutionAlreadyStartedError,
   WorkflowIdConflictPolicy,
@@ -22,6 +16,8 @@ export interface RelayOptions {
   /** Fails a delivery that has not answered in this long (unreachable Temporal). Default 5000. */
   deliverTimeoutMs?: number;
   log?: (line: string) => void;
+  /** Database hostname (never the URL) included in tick-failure logs. */
+  dbHost?: string;
 }
 
 export interface Relay {
@@ -66,9 +62,7 @@ export function startRelay(opts: RelayOptions): Relay {
       }
     } else if (row.type === "hold.released") {
       try {
-        await bounded(signal, () =>
-          client.workflow.getHandle(`hold-${holdId}`).signal("released"),
-        );
+        await bounded(signal, () => client.workflow.getHandle(`hold-${holdId}`).signal("released"));
       } catch (e) {
         if (!(e instanceof WorkflowNotFoundError)) throw e;
       }
@@ -111,7 +105,8 @@ export function startRelay(opts: RelayOptions): Relay {
       await fn();
     } catch {
       // Never log the error: it may echo connection strings. Name the stage only.
-      log(`relay ${label} failed; will retry`);
+      const where = opts.dbHost !== undefined ? ` (db host ${opts.dbHost})` : "";
+      log(`relay ${label} failed${where}; will retry`);
     }
   };
 
