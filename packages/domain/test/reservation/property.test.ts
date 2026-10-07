@@ -202,8 +202,18 @@ describe("property: validateHoldRequest", () => {
             new Set(r.seats.map((x) => x.seatId)).size === r.seats.length &&
             new Set(r.ga.map((x) => x.sectionId)).size === r.ga.length;
           if (unique && !a.ok && !b.ok) {
-            const key = (e: typeof a.error) => e.map((x) => `${x.rule}|${x.item}`).sort();
-            expect(key(b.error)).toEqual(key(a.error));
+            // companion_duplicate_for_access_seat flags whichever companion line comes second, so
+            // its item legitimately depends on line order. Compare it by rule count only; every
+            // other rule is per-line (or keyed by id) and must match on rule|item exactly.
+            const ORDER_DEPENDENT_ITEM = "companion_duplicate_for_access_seat";
+            const rules = (e: typeof a.error) => e.map((x) => x.rule).sort();
+            const exact = (e: typeof a.error) =>
+              e
+                .filter((x) => x.rule !== ORDER_DEPENDENT_ITEM)
+                .map((x) => `${x.rule}|${x.item}`)
+                .sort();
+            expect(rules(b.error)).toEqual(rules(a.error));
+            expect(exact(b.error)).toEqual(exact(a.error));
           }
         },
       ),
