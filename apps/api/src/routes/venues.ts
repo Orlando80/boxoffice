@@ -1,4 +1,4 @@
-import type { FastifyPluginAsync, FastifyReply } from "fastify";
+import type { FastifyPluginAsync } from "fastify";
 import type { ZodTypeProvider } from "fastify-type-provider-zod";
 import { z } from "zod";
 import {
@@ -10,6 +10,7 @@ import {
   VenueSummary,
 } from "@boxoffice/contracts";
 import type * as queries from "@boxoffice/db";
+import { errors, failed, installErrorHandler, makeGuard, NOT_FOUND } from "./common.js";
 
 type Q = typeof queries;
 type Rest<F> = F extends (db: never, ...args: infer A) => infer R ? (...args: A) => R : never;
@@ -24,11 +25,6 @@ export interface VenueRepository {
   getLayoutView: Rest<Q["getLayoutView"]>;
 }
 
-const NOT_FOUND = { error: "not_found" } as const;
-const BAD_REQUEST = { error: "bad_request" } as const;
-const UNAVAILABLE = { error: "unavailable" } as const;
-
-const errors = { 400: ErrorBody, 404: ErrorBody, 503: ErrorBody };
 const VenueParams = z.object({ venueId: z.uuid() });
 const EventParams = VenueParams.extend({ eventId: z.uuid() });
 const LayoutParams = VenueParams.extend({ layoutId: z.uuid() });
@@ -54,30 +50,8 @@ export const venueRoutes: FastifyPluginAsync<{ repo: VenueRepository }> = async 
   const app = instance.withTypeProvider<ZodTypeProvider>();
   const { repo } = opts;
 
-  // Replaces Fastify's default validation body with ErrorBody.
-  app.setErrorHandler((error, _req, reply) => {
-    if ((error as { validation?: unknown }).validation !== undefined) {
-      return reply.code(400).send(BAD_REQUEST);
-    }
-    // Anything else (mapping or serialization bug included): fixed body, no message text.
-    app.log.error("request failed");
-    return reply.code(503).send(UNAVAILABLE);
-  });
-
-  // Runs a repository call; any throw becomes 503 with a short log line only.
-  async function guard<T>(
-    reply: FastifyReply,
-    run: () => Promise<T>,
-  ): Promise<T | typeof UNAVAILABLE> {
-    try {
-      return await run();
-    } catch {
-      app.log.error("repository call failed");
-      void reply.code(503);
-      return UNAVAILABLE;
-    }
-  }
-  const failed = (r: unknown): r is typeof UNAVAILABLE => r === UNAVAILABLE;
+  installErrorHandler(app);
+  const guard = makeGuard(app);
 
   app.get(
     "/venues",

@@ -4,20 +4,22 @@ import { buildConnectionOptions } from "../src/connection.js";
 import { parseEnv } from "../src/env.js";
 import { noopWorkflow } from "../src/workflows.js";
 
+const DB = { DATABASE_URL: "postgres://u:p@db.example:5432/app" };
+
 describe("buildConnectionOptions", () => {
   it("with key: tls true and key", () => {
-    const o = buildConnectionOptions(parseEnv({ TEMPORAL_ADDRESS: "h:7233", TEMPORAL_API_KEY: "k" }));
+    const o = buildConnectionOptions(parseEnv({ ...DB, TEMPORAL_ADDRESS: "h:7233", TEMPORAL_API_KEY: "k" }));
     expect(o).toEqual({ address: "h:7233", tls: true, apiKey: "k" });
   });
   it("without key: no tls and no apiKey properties", () => {
-    const o = buildConnectionOptions(parseEnv({}));
+    const o = buildConnectionOptions(parseEnv({ ...DB }));
     expect(o).toEqual({ address: "localhost:7233" });
     expect("tls" in o).toBe(false);
     expect("apiKey" in o).toBe(false);
     expect(Object.keys(o)).toEqual(["address"]);
   });
   it("empty key behaves as no key", () => {
-    const o = buildConnectionOptions(parseEnv({ TEMPORAL_API_KEY: "" }));
+    const o = buildConnectionOptions(parseEnv({ ...DB, TEMPORAL_API_KEY: "" }));
     expect("tls" in o).toBe(false);
     expect("apiKey" in o).toBe(false);
   });

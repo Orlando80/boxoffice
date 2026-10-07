@@ -136,7 +136,7 @@ export const LayoutView = z
 export type LayoutView = z.infer<typeof LayoutView>;
 
 export const ErrorBody = z
-  .object({ error: z.enum(["not_found", "bad_request", "unavailable"]) })
+  .object({ error: z.enum(["not_found", "bad_request", "unavailable", "extension_limit", "hold_ended"]) })
   .strict();
 
 export type ErrorBody = z.infer<typeof ErrorBody>;

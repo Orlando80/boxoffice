@@ -1,4 +1,11 @@
-import { EventDetail, LayoutView, VenueDetail, VenueSummary } from "@boxoffice/contracts";
+import {
+  EventDetail,
+  LayoutView,
+  PerformanceAvailability,
+  PerformanceDetail,
+  VenueDetail,
+  VenueSummary,
+} from "@boxoffice/contracts";
 import { z } from "zod";
 import { parseEnv } from "./env";
 
@@ -53,5 +60,25 @@ export function getLayout(venueId: string, layoutId: string): Promise<LayoutView
   return get(
     `/venues/${encodeURIComponent(venueId)}/layouts/${encodeURIComponent(layoutId)}`,
     LayoutView,
+  );
+}
+
+export function getPerformance(
+  venueId: string,
+  performanceId: string,
+): Promise<PerformanceDetail | null> {
+  return get(
+    `/venues/${encodeURIComponent(venueId)}/performances/${encodeURIComponent(performanceId)}`,
+    PerformanceDetail,
+  );
+}
+
+export function getAvailability(
+  venueId: string,
+  performanceId: string,
+): Promise<PerformanceAvailability | null> {
+  return get(
+    `/venues/${encodeURIComponent(venueId)}/performances/${encodeURIComponent(performanceId)}/availability`,
+    PerformanceAvailability,
   );
 }

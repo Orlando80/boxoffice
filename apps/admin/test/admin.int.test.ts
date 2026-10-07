@@ -1,5 +1,5 @@
 import AxeBuilder from "@axe-core/playwright";
-import { chromium, type Browser, type BrowserContext, type Page } from "playwright";
+import { chromium, type Browser, type BrowserContext, type Locator, type Page } from "playwright";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { startStack, type Stack } from "./support/stack";
 
@@ -267,6 +267,208 @@ describe("AC 11: keyboard-only path", () => {
     expect(companionText).toContain(`Companion for ${accessLabel}`);
     await page.close();
   });
+});
+
+/** Space / Shift+Space until the row is inside the viewport (the table region holds focus). */
+async function pageToRow(page: Page, row: Locator, step: string) {
+  const settle = async () => {
+    let last = -1;
+    for (let i = 0; i < 40; i++) {
+      const y = await page.evaluate(() => window.scrollY);
+      if (y === last) return;
+      last = y;
+      await page.waitForTimeout(60);
+    }
+  };
+  expect(await row.count(), step).toBe(1);
+  let reached = false;
+  for (let i = 0; i < 120 && !reached; i++) {
+    const pos = await row.evaluate((r) => {
+      const b = r.getBoundingClientRect();
+      return b.top < 0 ? "above" : b.bottom > window.innerHeight ? "below" : "in";
+    });
+    reached = pos === "in";
+    if (!reached) {
+      await page.keyboard.press(pos === "below" ? "Space" : "Shift+Space");
+      await settle();
+    }
+  }
+  expect(reached, `${step} scrolled into view by keyboard`).toBe(true);
+}
+
+const tableRow = (page: Page, scope: string, rowLabel: string, seatLabel: string) =>
+  page
+    .locator(`${scope} tbody tr[data-seat-id]`)
+    .filter({ has: page.locator("td:nth-child(1)", { hasText: new RegExp(`^${rowLabel}$`) }) })
+    .filter({ has: page.locator("td:nth-child(2)", { hasText: new RegExp(`^${seatLabel}$`) }) });
+
+describe("AC 21: performance page with held seats", () => {
+  it("has no serious or critical axe violations", async () => {
+    const page = await newPage();
+    await page.goto(`${stack.adminUrl}${stack.heldPerformance.url}`);
+    expect(await page.locator("h1").count()).toBe(1);
+    expect(await seriousViolations(page)).toEqual([]);
+    await page.close();
+  }, 120_000);
+
+  it("shows the three held seats in the table, on the map and in the legend", async () => {
+    const page = await newPage();
+    await page.goto(`${stack.adminUrl}${stack.heldPerformance.url}`);
+
+    const tableHeld = await page.evaluate(() => {
+      const out: { id: string; label: string }[] = [];
+      for (const tr of Array.from(document.querySelectorAll("table tbody tr[data-seat-id]"))) {
+        const td = tr.querySelectorAll("td");
+        if (td[4]?.textContent?.trim() === "Held") {
+          out.push({
+            id: tr.getAttribute("data-seat-id")!,
+            label: `Row ${td[0]!.textContent}, Seat ${td[1]!.textContent}`,
+          });
+        }
+      }
+      return out;
+    });
+    expect(tableHeld.map((h) => h.label).sort()).toEqual(
+      [...stack.heldPerformance.heldSeatLabels].sort(),
+    );
+    const statuses = await page.evaluate(() =>
+      Array.from(document.querySelectorAll("table tbody tr[data-seat-id] td:nth-child(5)")).map(
+        (td) => td.textContent?.trim(),
+      ),
+    );
+    expect(new Set(statuses)).toEqual(new Set(["Held", "Available"]));
+
+    // Scope to the seat map svg, not the legend swatch.
+    const mapHeld = await page.evaluate(() =>
+      Array.from(document.querySelectorAll('svg[role="img"] g[data-held="true"]')).map((g) =>
+        g.getAttribute("data-seat-id"),
+      ),
+    );
+    expect(mapHeld.sort()).toEqual(tableHeld.map((h) => h.id).sort());
+    expect(
+      await page.locator('svg[role="img"] g[data-seat-id]:not([data-held])').count(),
+    ).toBeGreaterThan(100);
+    for (const h of tableHeld) {
+      const t = await page
+        .locator(`svg[role="img"] g[data-seat-id="${h.id}"] > title`)
+        .textContent();
+      expect(t, h.label).toMatch(/held/i);
+    }
+
+    expect(await page.locator(".seatmap-legend").innerText()).toContain("Held (hatched)");
+
+    // The access seat shows its feature label in the table.
+    const t3 = await tableRow(page, "table", "T", "3").first().innerText();
+    expect(t3).toMatch(/wheelchair space/i);
+    expect(t3).toMatch(/Has companion/);
+    await page.close();
+  }, 120_000);
+
+  it("at 320x640: no page horizontal scroll and the table is reachable", async () => {
+    const page = await newPage(320, 640);
+    await page.goto(`${stack.adminUrl}${stack.heldPerformance.url}`);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
+      320,
+    );
+    const region = page.getByRole("region", { name: "Stalls seat table" });
+    await region.scrollIntoViewIfNeeded();
+    await expect.poll(() => region.isVisible()).toBe(true);
+    await region.focus();
+    await expectFocusVisible(page, "Stalls table region at 320px");
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
+      320,
+    );
+    await page.close();
+  }, 120_000);
+});
+
+describe("AC 23: keyboard-only from the event page to a held seat row", () => {
+  it("event -> performance link -> Stalls table -> Row T Seat 3 reads Held", async () => {
+    const hp = stack.heldPerformance;
+    const page = await newPage();
+    await page.goto(`${stack.adminUrl}${hp.eventUrl}`);
+
+    const link = page.locator(`a[href$="/performances/${hp.performanceId}"]`);
+    expect(await link.count()).toBe(1);
+    const linkText = (await link.innerText()).trim().replace(/\s+/g, " ");
+    const escaped = linkText.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    await tabTo(page, new RegExp(`^${escaped}$`), "performance link");
+    expect(await page.evaluate(() => (document.activeElement as HTMLAnchorElement).href)).toMatch(
+      new RegExp(`/performances/${hp.performanceId}$`),
+    );
+    await Promise.all([
+      page.waitForURL(new RegExp(`/performances/${hp.performanceId}$`)),
+      page.keyboard.press("Enter"),
+    ]);
+    await page.getByRole("button", { name: "Zoom in" }).waitFor();
+
+    const region = await tabTo(page, /Stalls seat table/, "Stalls seat table region");
+    expect(region.name).toBe("Stalls seat table");
+
+    const row = tableRow(page, '[role="region"][aria-label="Stalls seat table"]', "T", "3");
+    expect(
+      await row.evaluate(
+        (r) =>
+          document.activeElement!.contains(r) &&
+          document.activeElement!.getAttribute("role") === "region",
+      ),
+      "row is inside the focused region",
+    ).toBe(true);
+    await pageToRow(page, row, "Row T Seat 3");
+    await expectFocusVisible(page, "Row T Seat 3 (region still focused)");
+    const cells = await row.locator("td").allInnerTexts();
+    expect(cells[4]).toBe("Held");
+    expect(cells[2]).toMatch(/wheelchair space/i);
+    await page.close();
+  }, 180_000);
+
+  it("the page HTML has no hold id and no access-need token", async () => {
+    const hp = stack.heldPerformance;
+    const page = await newPage();
+    const res = await page.goto(`${stack.adminUrl}${hp.url}`);
+    const raw = await res!.text();
+    const rendered = await page.content();
+    for (const html of [raw, rendered]) {
+      // "wheelchair_space" is a layout feature code and legitimately appears in each seat's
+      // data-features attribute (held or not). It must not appear anywhere else, i.e. not as
+      // a hold access need.
+      const withoutFeatureAttrs = html.replace(/data-features[^a-z]{1,5}[a-z_ ]*/g, "");
+      expect(withoutFeatureAttrs).not.toContain("wheelchair_space");
+      expect(html).not.toMatch(/accessNeed|access_need|holdId|hold_id/i);
+    }
+    // The held access seat's data-features equals that of unheld wheelchair seats (no hold data).
+    const feats = await page.evaluate(() => {
+      const g = (sel: string) =>
+        Array.from(document.querySelectorAll(sel)).map((e) => e.getAttribute("data-features"));
+      return {
+        held: g('svg[role="img"] g[data-held="true"]'),
+        unheldWc: g('svg[role="img"] g.seat-wheelchair:not([data-held])'),
+      };
+    });
+    expect(feats.held.some((f) => f?.includes("wheelchair_space"))).toBe(true);
+    expect(feats.unheldWc.some((f) => f?.includes("wheelchair_space"))).toBe(true);
+    // Every UUID in the markup must be a venue, event, performance, layout, section or seat id.
+    const perf = await get<{ layoutId: string }>(
+      `/venues/${hp.venueId}/performances/${hp.performanceId}`,
+    );
+    const known = new Set<string>([hp.venueId, hp.eventId, hp.performanceId, perf.layoutId]);
+    const domIds = await page.evaluate(() =>
+      Array.from(
+        document.querySelectorAll("[data-seat-id],[data-section-id],[data-ga-id]"),
+      ).flatMap((e) => [
+        e.getAttribute("data-seat-id"),
+        e.getAttribute("data-section-id"),
+        e.getAttribute("data-ga-id"),
+      ]),
+    );
+    for (const id of domIds) if (id) known.add(id.toLowerCase());
+    const found = (raw + rendered).match(
+      /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gi,
+    );
+    const unknown = [...new Set(found ?? [])].filter((u) => !known.has(u.toLowerCase()));
+    expect(unknown, "unexpected ids in HTML").toEqual([]);
+    await page.close();
+  }, 120_000);
 });
 
 describe("malformed ids show not-found, not the outage page", () => {

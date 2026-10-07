@@ -4,7 +4,7 @@ import { buildApp } from "./app.js";
 import { parseEnv } from "./env.js";
 import { createRepository } from "./repository.js";
 
-const { PORT, DATABASE_URL } = parseEnv(process.env);
+const { PORT, DATABASE_URL, HOLD_LENGTH_SECONDS } = parseEnv(process.env);
 const { db, close } = createDb(DATABASE_URL);
 
 try {
@@ -16,7 +16,9 @@ try {
   process.exit(1);
 }
 
-const app = buildApp(createRepository(db));
+const app = buildApp(createRepository(db, HOLD_LENGTH_SECONDS), {
+  logger: { level: "info", redact: ['req.headers["hold-token"]'] },
+});
 
 const shutdown = (): void => {
   app

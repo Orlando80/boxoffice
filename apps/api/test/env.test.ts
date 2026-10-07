@@ -5,8 +5,8 @@ const DB = "postgres://u:pw@localhost:5432/db";
 
 describe("parseEnv PORT", () => {
   it("defaults to 4000 when unset", () => {
-    expect(parseEnv({ DATABASE_URL: DB })).toEqual({ PORT: 4000, DATABASE_URL: DB });
-    expect(parseEnv({ PORT: undefined, DATABASE_URL: DB })).toEqual({ PORT: 4000, DATABASE_URL: DB });
+    expect(parseEnv({ DATABASE_URL: DB })).toEqual({ PORT: 4000, DATABASE_URL: DB, HOLD_LENGTH_SECONDS: 600 });
+    expect(parseEnv({ PORT: undefined, DATABASE_URL: DB })).toEqual({ PORT: 4000, DATABASE_URL: DB, HOLD_LENGTH_SECONDS: 600 });
   });
   it("defaults to 4000 when empty", () => {
     expect(parseEnv({ PORT: "", DATABASE_URL: DB }).PORT).toBe(4000);
@@ -62,4 +62,35 @@ describe("parseEnv DATABASE_URL", () => {
   it("a bad PORT is still reported by name when DATABASE_URL is fine", () => {
     expect(() => parseEnv({ PORT: "x", DATABASE_URL: DB })).toThrow(/PORT/);
   });
+});
+
+describe("parseEnv HOLD_LENGTH_SECONDS", () => {
+  it("defaults to 600 when unset or empty", () => {
+    expect(parseEnv({ DATABASE_URL: DB }).HOLD_LENGTH_SECONDS).toBe(600);
+    expect(parseEnv({ DATABASE_URL: DB, HOLD_LENGTH_SECONDS: "" }).HOLD_LENGTH_SECONDS).toBe(600);
+  });
+  it.each([
+    ["1", 1],
+    ["2", 2],
+    ["3600", 3600],
+  ])("accepts %s", (value, expected) => {
+    expect(parseEnv({ DATABASE_URL: DB, HOLD_LENGTH_SECONDS: value }).HOLD_LENGTH_SECONDS).toBe(
+      expected,
+    );
+  });
+  it.each(["0", "3601", "1.5", "abc", "-1", "1e2x", "NaN", "Infinity", "SENTINEL_s3cr3t_value"])(
+    "rejects %j naming only the variable",
+    (value) => {
+      let err: unknown;
+      try {
+        parseEnv({ DATABASE_URL: DB, HOLD_LENGTH_SECONDS: value });
+      } catch (e) {
+        err = e;
+      }
+      expect(err).toBeInstanceOf(Error);
+      expect((err as Error).message).toContain("HOLD_LENGTH_SECONDS");
+      if (value.length > 4) expect((err as Error).message).not.toContain(value);
+      expect((err as Error).message).not.toContain(DB);
+    },
+  );
 });

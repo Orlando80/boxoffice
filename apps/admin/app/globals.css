@@ -177,3 +177,21 @@ button[aria-disabled="true"] {
   border: 2px dashed #595959;
   cursor: not-allowed;
 }
+
+/* Held: hatch overlay (pattern in the svg defs) plus an "H" glyph and a heavier outline. */
+.seat .held-overlay circle,
+.seat .held-overlay rect,
+.seat .held-overlay polygon {
+  fill: url(#held-hatch);
+  stroke: #1a1a1a;
+  stroke-width: 1.5;
+}
+
+.held-hatch-line {
+  stroke: #1a1a1a;
+  stroke-width: 0.8;
+}
+
+.seat .held-glyph {
+  fill: #1a1a1a;
+}

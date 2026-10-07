@@ -15,6 +15,20 @@
       "when": 1791207870328,
       "tag": "0001_venues-seat-maps",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791326905841,
+      "tag": "0002_performance_venue_unique",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1791326906919,
+      "tag": "0003_holds",
+      "breakpoints": true
     }
   ]
 }

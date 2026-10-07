@@ -77,6 +77,56 @@ pnpm --filter @boxoffice/admin dev     # API_URL defaults to http://localhost:40
 
 Then open http://localhost:3001.
 
+### Run the worker and holds locally
+
+> The hold API has no sign-in or rate limit yet. Do not deploy the API or the worker publicly until an auth and rate-limit intent lands.
+
+Holds expire on a Temporal timer, so run the Temporal dev server and the worker
+alongside the API. Use the database from the previous section.
+
+```
+pnpm temporal:dev                              # localhost:7233, UI http://localhost:8233
+export DATABASE_URL=postgres://postgres:change-me@localhost:5433/postgres
+pnpm --filter @boxoffice/worker dev            # needs DATABASE_URL; Temporal defaults to localhost:7233
+HOLD_LENGTH_SECONDS=60 pnpm --filter @boxoffice/api dev   # optional: 60 s holds for quick expiry
+```
+
+In PowerShell, set variables with `$env:DATABASE_URL = "postgres://..."` and
+`$env:HOLD_LENGTH_SECONDS = "60"` instead of `export`. The default hold length
+is 600 seconds.
+
+Find the IDs you need, then try the hold API. The hold token is returned once,
+on create, and goes in the `Hold-Token` header, never in the URL.
+
+```
+API=http://localhost:4000
+curl $API/venues                                  # venue ids
+curl $API/venues/<venueId>/events/<eventId>       # performance ids
+curl $API/venues/<venueId>/layouts/<layoutId>     # seat ids
+
+# Create a hold. Access seats need role "access" and an accessNeed; the linked
+# companion seat uses role "companion" in the same hold.
+curl -X POST $API/venues/<venueId>/performances/<performanceId>/holds \
+  -H "Content-Type: application/json" \
+  -d '{"seats":[{"seatId":"<seatId>","role":"standard"}],"ga":[]}'
+
+# Use the token from the create response.
+curl $API/venues/<venueId>/holds/<holdId> -H "Hold-Token: <token>"
+curl -X POST $API/venues/<venueId>/holds/<holdId>/extend -H "Hold-Token: <token>"
+curl -X DELETE $API/venues/<venueId>/holds/<holdId> -H "Hold-Token: <token>"
+
+# Held seats and GA counts for a performance (no token needed).
+curl $API/venues/<venueId>/performances/<performanceId>/availability
+```
+
+A 409 means a conflict: `seats_unavailable` (lists the taken seat or section
+ids), `extension_limit` (10 extensions used) or `hold_ended` (released or
+expired). A 422 `invalid_hold` means the request breaks a seating rule, such as
+a companion seat held without its access seat; the response names the rule.
+
+The admin performance page, `/venues/<venueId>/performances/<performanceId>`,
+shows held seats on the map and in the table. Refresh the page to update it.
+
 ## Status
 
 Bootstrapping. See [docs/bootstrap.md](docs/bootstrap.md) for the full brief.
@@ -85,6 +135,7 @@ Bootstrapping. See [docs/bootstrap.md](docs/bootstrap.md) for the full brief.
 
 - [monorepo-skeleton](intent/monorepo-skeleton/intent.md): workspace, apps, CI and Docker images.
 - [venues-seat-maps](intent/venues-seat-maps/intent.md): venues, events and read-only seat maps in the admin app.
+- [holds](intent/holds/intent.md): seat and GA holds with Temporal expiry timers.
 
 ## Licence
 

@@ -64,7 +64,13 @@ export default async function Page({ params }: Props) {
           <tbody>
             {event.performances.map((p) => (
               <tr key={p.id}>
-                <th scope="row">{formatInZone(new Date(p.startsAt), venue.timeZone)}</th>
+                <th scope="row">
+                  <a
+                    href={`/venues/${encodeURIComponent(venue.id)}/performances/${encodeURIComponent(p.id)}`}
+                  >
+                    {formatInZone(new Date(p.startsAt), venue.timeZone)}
+                  </a>
+                </th>
                 <td>
                   <a href={`/venues/${venue.id}/layouts/${p.layoutId}`}>
                     {detail.layouts.find((l) => l.id === p.layoutId)?.name ?? "Layout"}

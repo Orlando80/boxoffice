@@ -11,6 +11,8 @@ vi.mock("../src/api", async (orig) => ({
   getVenue: vi.fn(),
   getEvent: vi.fn(),
   getLayout: vi.fn(),
+  getPerformance: vi.fn(),
+  getAvailability: vi.fn(),
 }));
 
 import RootLayout from "../app/layout";

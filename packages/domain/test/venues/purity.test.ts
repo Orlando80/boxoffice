@@ -1,14 +1,30 @@
 import { readdirSync, readFileSync } from "node:fs";
-import { join } from "node:path";
+import { join, relative } from "node:path";
 import { describe, expect, it } from "vitest";
 
-const dir = join(import.meta.dirname, "../../src/venues");
-const files = readdirSync(dir).filter((f) => f.endsWith(".ts"));
+const root = join(import.meta.dirname, "../../src");
+const walk = (d: string): string[] =>
+  readdirSync(d, { withFileTypes: true }).flatMap((e) =>
+    e.isDirectory() ? walk(join(d, e.name)) : e.name.endsWith(".ts") ? [join(d, e.name)] : [],
+  );
+const files = walk(root).map((p) => relative(root, p).replaceAll("\\", "/"));
 const strip = (s: string) => s.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/.*$/gm, "");
-const read = (f: string) => strip(readFileSync(join(dir, f), "utf8"));
+const read = (f: string) => strip(readFileSync(join(root, f), "utf8"));
 
-describe("venues domain is pure", () => {
+describe("domain is pure", () => {
   it("has source files", () => expect(files.length).toBeGreaterThanOrEqual(4));
+  it("covers venues, reservation and the top-level modules", () => {
+    expect(files).toEqual(
+      expect.arrayContaining([
+        "index.ts",
+        "result.ts",
+        "venues/invariants.ts",
+        "reservation/types.ts",
+        "reservation/rules.ts",
+        "reservation/state.ts",
+      ]),
+    );
+  });
   it.each(files)("%s imports only relative modules", (f) => {
     const specs = [
       ...read(f).matchAll(/(?:from\s+|import\s*\(\s*|require\s*\(\s*|import\s+)["']([^"']+)["']/g),

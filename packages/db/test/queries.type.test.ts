@@ -27,7 +27,7 @@ describe("queries venue-scoping convention (AC 9)", () => {
 
   it("the exported query set is the known one (new exports must be reviewed)", () => {
     expect(Object.keys(queries).sort()).toEqual(
-      ["getEvent", "getLayoutView", "getVenue", "listEvents", "listLayouts", "listVenues"].sort(),
+      ["getAvailability", "getEvent", "getLayoutView", "getPerformance", "getVenue", "listEvents", "listLayouts", "listVenues"].sort(),
     );
   });
 
@@ -37,6 +37,18 @@ describe("queries venue-scoping convention (AC 9)", () => {
     expectTypeOf<Parameters<typeof queries.listLayouts>[1]>().toEqualTypeOf<string>();
     expectTypeOf<Parameters<typeof queries.getEvent>[1]>().toEqualTypeOf<string>();
     expectTypeOf<Parameters<typeof queries.getLayoutView>[1]>().toEqualTypeOf<string>();
+    expectTypeOf<Parameters<typeof queries.getPerformance>[1]>().toEqualTypeOf<string>();
+    expectTypeOf<Parameters<typeof queries.getAvailability>[1]>().toEqualTypeOf<string>();
+    expectTypeOf<Parameters<typeof queries.getPerformance>[2]>().toEqualTypeOf<string>();
+    expectTypeOf<Parameters<typeof queries.getAvailability>[2]>().toEqualTypeOf<string>();
+    expectTypeOf<Parameters<typeof queries.getPerformance>["length"]>().toEqualTypeOf<3>();
+    expectTypeOf<Parameters<typeof queries.getAvailability>["length"]>().toEqualTypeOf<3>();
+    expectTypeOf<Awaited<ReturnType<typeof queries.getPerformance>>>().toEqualTypeOf<queries.PerformanceDetailRow | null>();
+    expectTypeOf<Awaited<ReturnType<typeof queries.getAvailability>>>().toEqualTypeOf<queries.AvailabilityView | null>();
+    expectTypeOf<queries.AvailabilityView["asOf"]>().toEqualTypeOf<Date>();
+    expectTypeOf<queries.AvailabilityView["heldSeatIds"]>().toEqualTypeOf<string[]>();
+    expectTypeOf<queries.AvailabilityView["ga"]>().toEqualTypeOf<queries.GaAvailability[]>();
+    expectTypeOf<queries.PerformanceDetailRow["startsAt"]>().toEqualTypeOf<Date>();
     // venueId is required, not optional
     expectTypeOf<Parameters<typeof queries.getVenue>["length"]>().toEqualTypeOf<2>();
     expectTypeOf<Parameters<typeof queries.listEvents>["length"]>().toEqualTypeOf<2>();
